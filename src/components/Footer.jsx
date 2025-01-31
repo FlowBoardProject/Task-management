@@ -19,9 +19,11 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 py-12">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-white text-lg font-semibold">Library App</h3>
+            <h3 className="text-white text-lg font-semibold">
+              Project Task Management
+            </h3>
             <p className="text-sm">
-              Empowering readers with unlimited access to knowledge and stories.
+              Organizing tasks efficiently for better project execution.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="hover:text-white transition-colors">
@@ -44,10 +46,10 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <Link
-                  to="/catalog"
+                  to="/dashboard"
                   className="text-sm hover:text-white transition-colors"
                 >
-                  Book Catalog
+                  Dashboard
                 </Link>
               </li>
               <li>
@@ -60,18 +62,18 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/membership"
+                  to="/pricing"
                   className="text-sm hover:text-white transition-colors"
                 >
-                  Membership
+                  Pricing
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/events"
+                  to="/features"
                   className="text-sm hover:text-white transition-colors"
                 >
-                  Events
+                  Features
                 </Link>
               </li>
             </ul>
@@ -126,15 +128,15 @@ const Footer = () => {
             <ul className="space-y-2">
               <li className="flex items-center space-x-2">
                 <Mail className="w-4 h-4" />
-                <span className="text-sm">support@libraryapp.com</span>
+                <span className="text-sm">support@taskmanager.com</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Phone className="w-4 h-4" />
-                <span className="text-sm">+1 (555) 123-4567</span>
+                <span className="text-sm">+962-64603422</span>
               </li>
               <li className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4" />
-                <span className="text-sm">123 Library Street, NY 10001</span>
+                <span className="text-sm">423 Orange Street, Zarqa</span>
               </li>
             </ul>
           </div>
@@ -144,7 +146,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-sm">
-              &copy; {currentYear} Library App. All rights reserved.
+              &copy; {currentYear} Project Task Management. All rights reserved.
             </p>
             <div className="flex space-x-6">
               <Link
