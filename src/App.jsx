@@ -11,8 +11,7 @@ import TaskDetails from "./pages/TaskDetails";
 import Articles from "./pages/Articles";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import PrivateRoute from "./components/PrivateRoute";
-
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
   return (
@@ -26,28 +25,21 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/articles" element={<Articles />} />
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            }
-          />
+          <Route path="/profile" element={<Profile />} />
           <Route
             path="/dashboard"
             element={
-              <PrivateRoute>
+              <ProtectedRoute>
                 <TaskDashboard />
-              </PrivateRoute>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/tasks/:taskId"
             element={
-              <PrivateRoute>
+              <ProtectedRoute>
                 <TaskDetails />
-              </PrivateRoute>
+              </ProtectedRoute>
             }
           />
         </Routes>
