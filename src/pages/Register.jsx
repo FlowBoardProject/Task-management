@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { auth, db } from "../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../firebase"; // Ensure `db` is initialized for Realtime Database
+import { createUserWithEmailAndPassword, getIdToken } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import Swal from "sweetalert2";
@@ -34,6 +34,7 @@ const schema = yup.object().shape({
     )
     .required("Password is required"),
   role: yup.string().required("Role is required"),
+  departments: yup.string().required("Department is required"),
 });
 
 export default function Register() {
@@ -62,6 +63,7 @@ export default function Register() {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
+      // Create user with email and password
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         data.email,
@@ -69,14 +71,26 @@ export default function Register() {
       );
       const user = userCredential.user;
 
-      await setDoc(doc(db, "users", user.uid), {
+      // Get the user's ID token
+      const idToken = await getIdToken(user);
+
+      // Prepare the data to be stored in the Realtime Database
+      const userData = {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         role: data.role,
+        departments: data.departments,
         createdAt: new Date().toISOString(),
-      });
+      };
 
+      // Firebase Realtime Database REST API URL
+      const dbUrl = `https://task-manager-najjar-default-rtdb.firebaseio.com/users/${user.uid}.json?auth=${idToken}`;
+
+      // Use Axios to store the data in the Realtime Database
+      await axios.put(dbUrl, userData);
+
+      // Show success message
       Swal.fire({
         icon: "success",
         title: "Welcome!",
@@ -86,9 +100,15 @@ export default function Register() {
           confirmButton: "bg-indigo-600 text-white px-4 py-2 rounded-lg",
         },
       }).then(() => {
-        navigate("/");
+        // Redirect based on the user's role
+        if (data.role === "manager") {
+          navigate("/dashboard");
+        } else {
+          navigate("/");
+        }
       });
     } catch (error) {
+      // Show error message
       Swal.fire({
         icon: "error",
         title: "Registration Failed",
@@ -280,8 +300,8 @@ export default function Register() {
                   {...register("departments")}
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                 >
-                  <option value="">Select a departments</option>
-                  <option value="It">It</option>
+                  <option value="">Select a department</option>
+                  <option value="It">IT</option>
                   <option value="Front-End department">
                     Front-End department
                   </option>

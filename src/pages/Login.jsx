@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase"; // Ensure `db` is initialized for Realtime Database
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
   confirmPasswordReset,
-} from "firebase/auth"; // Import confirmPasswordReset
+  getIdToken,
+} from "firebase/auth";
+import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -113,6 +115,7 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
+      // Sign in the user with email and password
       const userCredential = await signInWithEmailAndPassword(
         auth,
         data.email,
@@ -120,14 +123,36 @@ export default function Login() {
       );
       const user = userCredential.user;
 
-      Swal.fire({
-        icon: "success",
-        title: "Login Successful!",
-        text: `Welcome back, ${user.displayName || user.email}!`,
-        confirmButtonText: "OK",
-      }).then(() => {
-        navigate("/");
-      });
+      // Get the user's ID token
+      const idToken = await getIdToken(user);
+
+      // Fetch additional user data from Realtime Database using Axios
+      const dbUrl = `https://task-manager-najjar-default-rtdb.firebaseio.com/users/${user.uid}.json?auth=${idToken}`;
+      const response = await axios.get(dbUrl);
+
+      if (response.data) {
+        const userData = response.data;
+        Swal.fire({
+          icon: "success",
+          title: "Login Successful!",
+          text: `Welcome back, ${userData.firstName || user.email}!`,
+          confirmButtonText: "OK",
+        }).then(() => {
+          // Redirect to /dashboard if the role is "manager"
+          if (userData.role === "manager") {
+            navigate("/dashboard");
+          } else {
+            navigate("/");
+          }
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: "User data not found.",
+          confirmButtonText: "Try Again",
+        });
+      }
     } catch (error) {
       Swal.fire({
         icon: "error",
