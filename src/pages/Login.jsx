@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { auth, db } from "../firebase"; // Ensure `db` is initialized for Realtime Database
+import { auth, db, googleProvider } from "../firebase"; // Ensure `db` and `googleProvider` are imported
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
   confirmPasswordReset,
   getIdToken,
+  signInWithPopup, // Add this for Google Sign-In
 } from "firebase/auth";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
@@ -59,19 +60,6 @@ export default function Login() {
           text: "A password reset code has been sent to your email address.",
         }).then(async () => {
           // Prompt the user to enter the code
-          const { value: code } = await Swal.fire({
-            title: "Enter Reset Code",
-            input: "text",
-            inputLabel: "Enter the code sent to your email",
-            inputPlaceholder: "Reset code",
-            showCancelButton: true,
-            confirmButtonText: "Verify Code",
-            inputValidator: (value) => {
-              if (!value) {
-                return "You need to enter the code!";
-              }
-            },
-          });
 
           if (code) {
             // Prompt the user to enter a new password
@@ -110,6 +98,52 @@ export default function Login() {
           text: error.message,
         });
       }
+    }
+  };
+
+  // Function to handle Google Sign-In
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Get the user's ID token
+      const idToken = await getIdToken(user);
+
+      // Fetch additional user data from Realtime Database using Axios
+      const dbUrl = `https://task-manager-najjar-default-rtdb.firebaseio.com/users/${user.uid}.json?auth=${idToken}`;
+      const response = await axios.get(dbUrl);
+
+      if (response.data) {
+        const userData = response.data;
+        Swal.fire({
+          icon: "success",
+          title: "Login Successful!",
+          text: `Welcome back, ${userData.firstName || user.email}!`,
+          confirmButtonText: "OK",
+        }).then(() => {
+          // Redirect to /dashboard if the role is "manager"
+          if (userData.role === "manager") {
+            navigate("/dashboard");
+          } else {
+            navigate("/");
+          }
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: "User data not found.",
+          confirmButtonText: "Try Again",
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Google Sign-In Failed",
+        text: error.message,
+        confirmButtonText: "Try Again",
+      });
     }
   };
 
@@ -253,6 +287,20 @@ export default function Login() {
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
             >
               {isSubmitting ? "Signing in..." : "Sign in"}
+            </button>
+
+            {/* Google Sign-In Button */}
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              className="w-full flex justify-center items-center space-x-2 py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 mt-4"
+            >
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google logo"
+                className="h-5 w-5"
+              />
+              <span>Sign in with Google</span>
             </button>
 
             <div className="text-center mt-6">

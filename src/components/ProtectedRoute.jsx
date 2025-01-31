@@ -38,46 +38,54 @@ const LoadingSpinner = ({ size = "md", color = "blue" }) => {
 
 const ProtectedRoute = ({ children }) => {
   const [userRole, setUserRole] = useState(null);
+  const [emailVerified, setEmailVerified] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Listen for changes in the user's authentication state
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // If a user is logged in, fetch their role
+        await user.reload();
+
+        // Check if the user's email is verified
+        setEmailVerified(user.emailVerified);
+
+        // Fetch the user's role from the database
         const userRef = ref(db, `users/${user.uid}`);
         const snapshot = await get(userRef);
         if (snapshot.exists()) {
           const role = snapshot.val().role;
-          console.log("User role:", role); // Debug: Log the role
+          console.log("User role:", role);
           setUserRole(role);
         } else {
-          console.log("No role found for user:", user.uid); // Debug: Log if no role is found
+          console.log("No role found for user:", user.uid);
         }
       } else {
-        console.log("No user is logged in"); // Debug: Log if no user is logged in
+        console.log("No user is logged in");
       }
       setLoading(false);
     });
 
-    // Clean up the listener when the component unmounts
     return () => unsubscribe();
   }, []);
 
   if (loading) {
-    console.log("Loading..."); // Debug: Log loading state
+    console.log("Loading...");
     return <LoadingSpinner size="lg" color="blue" />;
   }
 
-  console.log("User role after loading:", userRole); // Debug: Log user role
+  console.log("User role after loading:", userRole);
+  console.log("Email verified:", emailVerified);
 
-  // If the user is not a manager, redirect to the home page
   if (userRole !== "manager") {
-    console.log("Redirecting to / because role is not manager"); // Debug: Log redirection
+    console.log("Redirecting to / because role is not manager");
     return <Navigate to="/" replace />;
   }
 
-  // If the user is a manager, render the children
+  if (!emailVerified) {
+    console.log("Redirecting to /verify-email because email is not verified");
+    return <Navigate to="/verify-email" replace />;
+  }
+
   return children;
 };
 
