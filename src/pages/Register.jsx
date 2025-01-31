@@ -1,6 +1,11 @@
 import { useState } from "react";
-import { auth, db } from "../firebase"; // Ensure `db` is initialized for Realtime Database
-import { createUserWithEmailAndPassword, getIdToken } from "firebase/auth";
+import { auth, db, googleProvider } from "../firebase";
+import { sendEmailVerification } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  getIdToken,
+  signInWithPopup,
+} from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axios from "axios";
@@ -71,6 +76,9 @@ export default function Register() {
       );
       const user = userCredential.user;
 
+      // Send email verification
+      await sendEmailVerification(user);
+
       // Get the user's ID token
       const idToken = await getIdToken(user);
 
@@ -81,6 +89,61 @@ export default function Register() {
         email: data.email,
         role: data.role,
         departments: data.departments,
+        createdAt: new Date().toISOString(),
+        emailVerified: false, // Add a field to track email verification status
+      };
+
+      // Firebase Realtime Database REST API URL
+      const dbUrl = `https://task-manager-najjar-default-rtdb.firebaseio.com/users/${user.uid}.json?auth=${idToken}`;
+
+      // Use Axios to store the data in the Realtime Database
+      await axios.put(dbUrl, userData);
+
+      // Show success message and prompt the user to verify their email
+      Swal.fire({
+        icon: "success",
+        title: "Welcome!",
+        text: "Your account has been successfully created. Please check your email to verify your account.",
+        confirmButtonText: "Continue",
+        customClass: {
+          confirmButton: "bg-indigo-600 text-white px-4 py-2 rounded-lg",
+        },
+      }).then(() => {
+        // Redirect to a verification page or home page
+        navigate("/verify-email"); // You can create a route for this page
+      });
+    } catch (error) {
+      // Show error message
+      Swal.fire({
+        icon: "error",
+        title: "Registration Failed",
+        text: error.message,
+        confirmButtonText: "Try Again",
+        customClass: {
+          confirmButton: "bg-indigo-600 text-white px-4 py-2 rounded-lg",
+        },
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Get the user's ID token
+      const idToken = await getIdToken(user);
+
+      // Prepare the data to be stored in the Realtime Database
+      const userData = {
+        firstName: user.displayName.split(" ")[0],
+        lastName: user.displayName.split(" ")[1] || "",
+        email: user.email,
+        role: "team-member", // Default role for Google sign-in
+        departments: "It", // Default department for Google sign-in
         createdAt: new Date().toISOString(),
       };
 
@@ -94,24 +157,19 @@ export default function Register() {
       Swal.fire({
         icon: "success",
         title: "Welcome!",
-        text: "Your account has been successfully created.",
+        text: "Your account has been successfully created with Google.",
         confirmButtonText: "Continue",
         customClass: {
           confirmButton: "bg-indigo-600 text-white px-4 py-2 rounded-lg",
         },
       }).then(() => {
-        // Redirect based on the user's role
-        if (data.role === "manager") {
-          navigate("/dashboard");
-        } else {
-          navigate("/");
-        }
+        navigate("/");
       });
     } catch (error) {
       // Show error message
       Swal.fire({
         icon: "error",
-        title: "Registration Failed",
+        title: "Google Sign-In Failed",
         text: error.message,
         confirmButtonText: "Try Again",
         customClass: {
@@ -318,6 +376,22 @@ export default function Register() {
                   </p>
                 )}
               </div>
+            </div>
+
+            <div>
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
+                className="flex w-full justify-center items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <img
+                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                  alt="Google logo"
+                  className="h-5 w-5"
+                />
+                <span>Sign up with Google</span>
+              </button>
             </div>
 
             <div>
