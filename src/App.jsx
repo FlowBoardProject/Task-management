@@ -12,7 +12,7 @@ import Articles from "./pages/Articles";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import PrivateRoute from "./components/PrivateRoute";
-
+import TaskBoard from "./pages/Task-Board";
 
 export default function App() {
   return (
@@ -26,6 +26,8 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/articles" element={<Articles />} />
+          <Route path="/task-board" element={<TaskBoard />} />
+          <Route path="/task/:id" element={<TaskDetails />} />
           <Route
             path="/profile"
             element={
