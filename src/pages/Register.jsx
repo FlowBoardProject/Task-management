@@ -359,7 +359,7 @@ export default function Register() {
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                 >
                   <option value="">Select a department</option>
-                  <option value="It">IT</option>
+                  <option value="IT">IT</option>
                   <option value="Front-End department">
                     Front-End department
                   </option>
