@@ -29,7 +29,7 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/articles" element={<Articles />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/tasks" element={<TaskBoard />} />
+          <Route path="/tasks" element={<ProtectedRoute><TaskBoard /></ProtectedRoute>} />
           <Route
             path="/dashboard"
             element={
@@ -39,13 +39,14 @@ export default function App() {
             }
           />
           <Route
-            path="/tasks/:taskId"
-            element={
-              <ProtectedRoute>
-                <TaskDetails />
-              </ProtectedRoute>
-            }
-          />
+    path="/tasks/:id"
+    element={
+        <ProtectedRoute>
+            <TaskDetails />
+        </ProtectedRoute>
+    }
+/>
+
         </Routes>
         <Footer/>
       </AuthProvider>
