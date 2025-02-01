@@ -13,6 +13,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import VerifyEmail from "./pages/VerifyEmail";
 import ProtectedRoute from "./components/ProtectedRoute";
+import TaskBoard from "./pages/TaskBoard";
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/articles" element={<Articles />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/tasks" element={<TaskBoard />} />
           <Route
             path="/dashboard"
             element={
