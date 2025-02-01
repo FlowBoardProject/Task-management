@@ -97,7 +97,7 @@ export default function TaskCard({ task, setEditTask, onMoveTask }) {
 
        {/* 🔎 View Details Button */}
 <div className="mt-4">
-  <Link to={`/tasks/${task.id}`} className="block">
+<Link to={`/tasks/${task.id}`} className="block">
     <Button 
       className="w-full text-sm px-5 py-3 rounded-xl font-semibold 
                  bg-gradient-to-r from-blue-500 to-purple-600 

@@ -1,18 +1,17 @@
-import axios from "axios";
-import { ref, push } from "firebase/database";
-import { db } from "../firebase"; // ✅ Import Firebase Realtime Database
+import { ref, push, get, child, update } from "firebase/database";
+import { db } from "../firebase"; 
 
-const FIREBASE_URL = "https://task-manager-najjar-default-rtdb.firebaseio.com/tasks.json";
+const TASKS_PATH = "tasks";
 
 /**
- * Add a new task to Firebase Realtime Database.
+ * Add a new task to Firebase.
  * @param {Object} task - Task object to be added.
  * @returns {Promise<string>} - Task ID
  */
 export const addTaskToFirebase = async (task) => {
     try {
-        const tasksRef = ref(db, "tasks");
-        console.log("📌 Sending to Firebase:", task); // ✅ Debugging log
+        const tasksRef = ref(db, TASKS_PATH);
+        console.log("📌 Sending to Firebase:", task); 
         const newTaskRef = await push(tasksRef, task);
         return newTaskRef.key;
     } catch (error) {
@@ -21,20 +20,21 @@ export const addTaskToFirebase = async (task) => {
     }
 };
 
-
 /**
- * Get all tasks from Firebase Realtime Database.
+ * Fetch all tasks from Firebase.
  * @returns {Promise<Array>} - List of tasks.
  */
 export const getTasksFromFirebase = async () => {
     try {
-        const response = await axios.get(FIREBASE_URL);
+        const dbRef = ref(db);
+        const snapshot = await get(child(dbRef, TASKS_PATH));
 
-        if (!response.data) return [];
+        if (!snapshot.exists()) return [];
 
-        return Object.keys(response.data).map((key) => ({
-            id: key,
-            ...response.data[key],
+        const tasksData = snapshot.val();
+        return Object.entries(tasksData).map(([id, task]) => ({
+            id,
+            ...task,
         }));
     } catch (error) {
         console.error("❌ Error fetching tasks from Firebase:", error);
@@ -43,14 +43,23 @@ export const getTasksFromFirebase = async () => {
 };
 
 /**
- * Delete a task from Firebase.
- * @param {string} taskId - Task ID to delete.
+ * Update the status of a task in Firebase.
+ * @param {string} taskId - The task ID.
+ * @param {string} newStatus - The new status (todo, in-progress, done).
  */
-export const deleteTaskFromFirebase = async (taskId) => {
+export const updateTaskStatusInFirebase = async (taskId, newStatus) => {
     try {
-        await axios.delete(`https://task-manager-najjar-default-rtdb.firebaseio.com/tasks/${taskId}.json`);
+        if (typeof newStatus !== "string") {
+            console.error("❌ Error: newStatus is not a string", newStatus);
+            return;
+        }
+
+        const taskRef = ref(db, `tasks/${taskId}`);
+        await update(taskRef, { status: newStatus });
+        console.log(`✅ Task ${taskId} updated to status: ${newStatus}`);
     } catch (error) {
-        console.error("❌ Error deleting task from Firebase:", error);
-        throw error;
+        console.error("❌ Error updating task status:", error);
     }
 };
+
+

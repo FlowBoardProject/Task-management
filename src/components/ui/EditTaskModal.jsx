@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { ref, update } from "firebase/database"; // ✅ Import Firebase update
+import { db } from "../../firebase"; // ✅ Firebase instance
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { X, ChevronDown, User } from "lucide-react";
@@ -11,9 +13,20 @@ export default function EditTaskModal({ task, users, onSave, onClose }) {
         setUpdatedTask(task);
     }, [task]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSave(updatedTask);
+        
+        try {
+            // ✅ Update task in Firebase
+            const taskRef = ref(db, `tasks/${updatedTask.id}`);
+            await update(taskRef, updatedTask);
+            console.log(`✅ Task ${updatedTask.id} updated successfully`);
+
+            onSave(updatedTask);
+            onClose(); // ✅ Close modal after saving
+        } catch (error) {
+            console.error("❌ Error updating task:", error);
+        }
     };
 
     const toggleUserSelection = (user) => {
@@ -89,7 +102,7 @@ export default function EditTaskModal({ task, users, onSave, onClose }) {
                             onClick={() => setDropdownOpen(!dropdownOpen)}
                             className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-300 focus:border-blue-500 cursor-pointer flex items-center justify-between bg-white"
                         >
-                            {updatedTask.assignedTo.length > 0 ? (
+                            {updatedTask.assignedTo?.length > 0 ? (
                                 <span>{updatedTask.assignedTo.join(", ")}</span>
                             ) : (
                                 <span className="text-gray-400">Select team members</span>
@@ -104,12 +117,15 @@ export default function EditTaskModal({ task, users, onSave, onClose }) {
                                     {users.map((user) => (
                                         <li
                                             key={user}
+                                            onClick={() => {
+                                                toggleUserSelection(user);
+                                                setDropdownOpen(false); // ✅ Close dropdown after selection
+                                            }}
                                             className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer"
                                         >
                                             <input
                                                 type="checkbox"
                                                 checked={updatedTask.assignedTo.includes(user)}
-                                                onChange={() => toggleUserSelection(user)}
                                                 className="w-4 h-4"
                                             />
                                             {user}

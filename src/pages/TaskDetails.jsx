@@ -1,19 +1,13 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/Button";
+import { db } from "../firebase"; 
+import { ref, get } from "firebase/database";
 import { TaskHeader } from "../components/TaskHeader";
 import { TaskActions } from "../components/TaskActions";
 import { TaskInfo } from "../components/TaskInfo";
 import { DeleteConfirmationModal } from "../components/DeleteConfirmationModal";
 import { TaskComments } from "../components/TaskComments";
-
-const initialTasks = [
-    { id: "1", title: "Design Homepage", description: "Create homepage UI", deadline: "2024-02-15", priority: "High", assignedTo: ["Alice"], status: "todo" },
-    { id: "2", title: "Implement Login", description: "Develop login system", deadline: "2024-02-20", priority: "Medium", assignedTo: ["Bob"], status: "in-progress" },
-    { id: "3", title: "Test API Endpoints", description: "Ensure all API calls work", deadline: "2024-02-25", priority: "Low", assignedTo: ["Charlie"], status: "done" },
-];
-
-const users = ["Alice", "Bob", "Charlie", "Dave", "Eve"];
 
 export default function TaskDetails() {
     const { id } = useParams();
@@ -27,23 +21,34 @@ export default function TaskDetails() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     useEffect(() => {
-        console.log("Task ID from URL:", id); // Debugging
+        console.log("Task ID from URL:", id);
 
         if (!id) {
             console.error("❌ No task ID found in URL");
             return;
         }
 
-        // 🔥 Make sure `id` is a string to match task ID
-        const foundTask = initialTasks.find(task => task.id.toString() === id.toString());
+        // 🔥 Fetch task from Firebase
+        const fetchTask = async () => {
+            try {
+                const taskRef = ref(db, `tasks/${id}`);
+                const snapshot = await get(taskRef);
 
-        if (foundTask) {
-            setTask(foundTask);
-            setEditedTask({ ...foundTask });
-        } else {
-            console.warn("⚠️ Task not found for ID:", id);
-        }
-    }, [id]);
+                if (snapshot.exists()) {
+                    const taskData = snapshot.val();
+                    setTask({ id, ...taskData });
+                    setEditedTask({ id, ...taskData });
+                } else {
+                    console.warn("⚠️ Task not found for ID:", id);
+                    navigate("/tasks"); // Redirect back if not found
+                }
+            } catch (error) {
+                console.error("❌ Error fetching task:", error);
+            }
+        };
+
+        fetchTask();
+    }, [id, navigate]);
 
     const handleSaveEdit = () => {
         setTask(editedTask);
@@ -56,7 +61,7 @@ export default function TaskDetails() {
 
     const confirmDelete = () => {
         setShowDeleteModal(false);
-        navigate("/task-board");
+        navigate("/tasks");
     };
 
     const cancelDelete = () => {
@@ -83,7 +88,7 @@ export default function TaskDetails() {
                     isEditing={isEditing} 
                     task={editedTask} 
                     setTask={setEditedTask} 
-                    users={users} 
+                    users={task.assignedTo || []} 
                 />
 
                 <TaskComments 
