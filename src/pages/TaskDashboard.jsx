@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { db } from "../firebase";
-import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../firebase"; // Ensure `db` is initialized for Realtime Database
+import { ref, onValue } from "firebase/database"; // Import Realtime Database functions
 import TaskForm from "../components/TaskForm";
 import TaskCard from "../components/TaskCard";
 
@@ -8,14 +8,22 @@ export default function TaskDashboard() {
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "tasks"), (snapshot) => {
-      const tasksData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+    // Reference to the "tasks" node in the Realtime Database
+    const tasksRef = ref(db, "tasks");
+
+    // Listen for changes in the "tasks" node
+    const unsubscribe = onValue(tasksRef, (snapshot) => {
+      const tasksData = [];
+      snapshot.forEach((childSnapshot) => {
+        tasksData.push({
+          id: childSnapshot.key, // Use the key as the task ID
+          ...childSnapshot.val(), // Spread the task data
+        });
+      });
       setTasks(tasksData);
     });
 
+    // Cleanup the listener when the component unmounts
     return () => unsubscribe();
   }, []);
 

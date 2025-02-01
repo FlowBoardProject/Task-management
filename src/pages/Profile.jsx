@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react";
-import { auth, db } from "../firebase";
-import {
-  doc,
-  getDoc,
-  updateDoc,
-  collection,
-  getDocs,
-} from "firebase/firestore";
+import { auth, db } from "../firebase"; // Ensure `db` is initialized for Realtime Database
+import { ref, get } from "firebase/database"; // Import Realtime Database functions
+import { getIdToken } from "firebase/auth";
+import axios from "axios"; // Import Axios
+
 import { useAuth } from "../context/AuthContext";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -33,6 +30,7 @@ export default function Profile() {
   const { user } = useAuth();
   const [assignedTasks, setAssignedTasks] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -45,20 +43,30 @@ export default function Profile() {
   useEffect(() => {
     const fetchUserData = async () => {
       if (user) {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
+        // Fetch user data from Realtime Database
+        const userRef = ref(db, `users/${user.uid}`);
+        const userSnapshot = await get(userRef);
+
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.val();
           reset({
-            firstName: userDoc.data().firstName,
-            lastName: userDoc.data().lastName,
-            email: userDoc.data().email,
-            role: userDoc.data().role,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            email: userData.email,
+            role: userData.role,
           });
         }
 
-        const tasksSnapshot = await getDocs(collection(db, "tasks"));
-        const tasks = tasksSnapshot.docs
-          .filter((doc) => doc.data().assignedTo === user.uid)
-          .map((doc) => ({ id: doc.id, ...doc.data() }));
+        // Fetch tasks from Realtime Database
+        const tasksRef = ref(db, "tasks");
+        const tasksSnapshot = await get(tasksRef);
+        const tasks = [];
+        tasksSnapshot.forEach((childSnapshot) => {
+          const task = childSnapshot.val();
+          if (task.assignedTo === user.uid) {
+            tasks.push({ id: childSnapshot.key, ...task });
+          }
+        });
         setAssignedTasks(tasks);
       }
     };
@@ -67,7 +75,10 @@ export default function Profile() {
 
   const onSubmit = async (data) => {
     try {
-      await updateDoc(doc(db, "users", user.uid), {
+      const idToken = await getIdToken(auth.currentUser);
+      const url = `https://task-manager-najjar-default-rtdb.firebaseio.com/users/${user.uid}.json?auth=${idToken}`;
+
+      await axios.put(url, {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,

@@ -1,9 +1,14 @@
 import { useState } from "react";
-import { auth, db } from "../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { auth, db, googleProvider } from "../firebase";
+import { sendEmailVerification } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  getIdToken,
+  signInWithPopup,
+} from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import Swal from "sweetalert2";
@@ -34,6 +39,7 @@ const schema = yup.object().shape({
     )
     .required("Password is required"),
   role: yup.string().required("Role is required"),
+  departments: yup.string().required("Department is required"),
 });
 
 export default function Register() {
@@ -62,6 +68,7 @@ export default function Register() {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
+      // Create user with email and password
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         data.email,
@@ -69,18 +76,88 @@ export default function Register() {
       );
       const user = userCredential.user;
 
-      await setDoc(doc(db, "users", user.uid), {
+      // Send email verification
+      await sendEmailVerification(user);
+
+      // Get the user's ID token
+      const idToken = await getIdToken(user);
+
+      // Prepare the data to be stored in the Realtime Database
+      const userData = {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         role: data.role,
+        departments: data.departments,
         createdAt: new Date().toISOString(),
-      });
+        emailVerified: false, // Add a field to track email verification status
+      };
 
+      // Firebase Realtime Database REST API URL
+      const dbUrl = `https://task-manager-najjar-default-rtdb.firebaseio.com/users/${user.uid}.json?auth=${idToken}`;
+
+      // Use Axios to store the data in the Realtime Database
+      await axios.put(dbUrl, userData);
+
+      // Show success message and prompt the user to verify their email
       Swal.fire({
         icon: "success",
         title: "Welcome!",
-        text: "Your account has been successfully created.",
+        text: "Your account has been successfully created. Please check your email to verify your account.",
+        confirmButtonText: "Continue",
+        customClass: {
+          confirmButton: "bg-indigo-600 text-white px-4 py-2 rounded-lg",
+        },
+      }).then(() => {
+        // Redirect to a verification page or home page
+        navigate("/verify-email"); // You can create a route for this page
+      });
+    } catch (error) {
+      // Show error message
+      Swal.fire({
+        icon: "error",
+        title: "Registration Failed",
+        text: error.message,
+        confirmButtonText: "Try Again",
+        customClass: {
+          confirmButton: "bg-indigo-600 text-white px-4 py-2 rounded-lg",
+        },
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Get the user's ID token
+      const idToken = await getIdToken(user);
+
+      // Prepare the data to be stored in the Realtime Database
+      const userData = {
+        firstName: user.displayName.split(" ")[0],
+        lastName: user.displayName.split(" ")[1] || "",
+        email: user.email,
+        role: "team-member", // Default role for Google sign-in
+        departments: "It", // Default department for Google sign-in
+        createdAt: new Date().toISOString(),
+      };
+
+      // Firebase Realtime Database REST API URL
+      const dbUrl = `https://task-manager-najjar-default-rtdb.firebaseio.com/users/${user.uid}.json?auth=${idToken}`;
+
+      // Use Axios to store the data in the Realtime Database
+      await axios.put(dbUrl, userData);
+
+      // Show success message
+      Swal.fire({
+        icon: "success",
+        title: "Welcome!",
+        text: "Your account has been successfully created with Google.",
         confirmButtonText: "Continue",
         customClass: {
           confirmButton: "bg-indigo-600 text-white px-4 py-2 rounded-lg",
@@ -89,9 +166,10 @@ export default function Register() {
         navigate("/");
       });
     } catch (error) {
+      // Show error message
       Swal.fire({
         icon: "error",
-        title: "Registration Failed",
+        title: "Google Sign-In Failed",
         text: error.message,
         confirmButtonText: "Try Again",
         customClass: {
@@ -280,8 +358,8 @@ export default function Register() {
                   {...register("departments")}
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                 >
-                  <option value="">Select a departments</option>
-                  <option value="It">It</option>
+                  <option value="">Select a department</option>
+                  <option value="It">IT</option>
                   <option value="Front-End department">
                     Front-End department
                   </option>
@@ -298,6 +376,22 @@ export default function Register() {
                   </p>
                 )}
               </div>
+            </div>
+
+            <div>
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
+                className="flex w-full justify-center items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <img
+                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                  alt="Google logo"
+                  className="h-5 w-5"
+                />
+                <span>Sign up with Google</span>
+              </button>
             </div>
 
             <div>

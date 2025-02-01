@@ -11,8 +11,8 @@ import TaskDetails from "./pages/TaskDetails";
 import Articles from "./pages/Articles";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import PrivateRoute from "./components/PrivateRoute";
-import TaskBoard from "./pages/Task-Board";
+import VerifyEmail from "./pages/VerifyEmail";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
   return (
@@ -23,33 +23,25 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/articles" element={<Articles />} />
-          <Route path="/task-board" element={<TaskBoard />} />
-          <Route path="/task/:id" element={<TaskDetails />} />
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            }
-          />
+          <Route path="/profile" element={<Profile />} />
           <Route
             path="/dashboard"
             element={
-              <PrivateRoute>
+              <ProtectedRoute>
                 <TaskDashboard />
-              </PrivateRoute>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/tasks/:taskId"
             element={
-              <PrivateRoute>
+              <ProtectedRoute>
                 <TaskDetails />
-              </PrivateRoute>
+              </ProtectedRoute>
             }
           />
         </Routes>
