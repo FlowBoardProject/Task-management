@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => { //already in firebase to check status of user if login
       if (user) {
         const userRef = ref(db, `users/${user.uid}`); 
         const snapshot = await get(userRef);
