@@ -11,6 +11,7 @@ import Articles from "./pages/Articles";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import PrivateRoute from "./components/PrivateRoute";
+import Footer from "./components/Footer";
 
 
 export default function App() {
@@ -50,6 +51,7 @@ export default function App() {
             }
           />
         </Routes>
+        <Footer/>
       </AuthProvider>
     </Router>
   );
