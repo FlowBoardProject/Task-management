@@ -1,120 +1,102 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { db } from "../firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { toast } from "react-toastify";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
+import { TaskHeader } from "../components/TaskHeader";
+import { TaskActions } from "../components/TaskActions";
+import { TaskInfo } from "../components/TaskInfo";
+import { DeleteConfirmationModal } from "../components/DeleteConfirmationModal";
+import { TaskComments } from "../components/TaskComments";
+import { Trash2 } from "lucide-react";
+
+const initialTasks = [
+    { id: "1", title: "Design Homepage", description: "Create homepage UI", deadline: "2024-02-15", priority: "High", assignedTo: ["Alice"], status: "todo" },
+    { id: "2", title: "Implement Login", description: "Develop login system", deadline: "2024-02-20", priority: "Medium", assignedTo: ["Bob"], status: "in-progress" },
+    { id: "3", title: "Test API Endpoints", description: "Ensure all API calls work", deadline: "2024-02-25", priority: "Low", assignedTo: ["Charlie"], status: "done" },
+];
+
+const users = ["Alice", "Bob", "Charlie", "Dave", "Eve"];
 
 export default function TaskDetails() {
-  const { taskId } = useParams();
-  const [task, setTask] = useState(null);
-  const [status, setStatus] = useState("");
-  const [comment, setComment] = useState("");
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [task, setTask] = useState(null);
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState("");
+    const [commenterName, setCommenterName] = useState("");
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedTask, setEditedTask] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  useEffect(() => {
-    const fetchTask = async () => {
-      const taskDoc = await getDoc(doc(db, "tasks", taskId));
-      if (taskDoc.exists()) {
-        setTask({ id: taskDoc.id, ...taskDoc.data() });
-        setStatus(taskDoc.data().status);
-      } else {
-        toast.error("Task not found");
-      }
+    useEffect(() => {
+        const foundTask = initialTasks.find(task => task.id === id);
+        if (foundTask) {
+            setTask(foundTask);
+            setEditedTask({ ...foundTask });
+        }
+    }, [id]);
+
+    const handleSaveEdit = () => {
+        setTask(editedTask);
+        setIsEditing(false);
     };
-    fetchTask();
-  }, [taskId]);
 
-  const handleStatusUpdate = async () => {
-    try {
-      await updateDoc(doc(db, "tasks", taskId), { status });
-      toast.success("Status updated successfully!");
-    } catch (error) {
-      toast.error("Error updating status: " + error.message);
+    const handleDeleteTask = () => {
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = () => {
+        setShowDeleteModal(false);
+        navigate("/Task-Board");
+    };
+
+    const cancelDelete = () => {
+        setShowDeleteModal(false);
+    };
+
+    if (!task) {
+        return <div className="text-center text-gray-600 mt-10">Task not found</div>;
     }
-  };
 
-  const handleAddComment = async () => {
-    if (!comment) {
-      toast.error("Please enter a comment");
-      return;
-    }
-    try {
-      await updateDoc(doc(db, "tasks", taskId), {
-        comments: [...(task.comments || []), comment],
-      });
-      toast.success("Comment added successfully!");
-      setComment("");
-    } catch (error) {
-      toast.error("Error adding comment: " + error.message);
-    }
-  };
+    return (
+        <div className="min-h-screen bg-gray-100">
+            <TaskHeader title={task.title} description={task.description} />
 
-  if (!task) return <div>Loading...</div>;
+            <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+                <TaskActions 
+                    isEditing={isEditing} 
+                    onEditToggle={() => setIsEditing(!isEditing)} 
+                    onSave={handleSaveEdit} 
+                    onDelete={handleDeleteTask} 
+                />
 
-  return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="container mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Task Details</h1>
-        <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-          <h2 className="text-2xl font-semibold mb-4">{task.title}</h2>
-          <p className="text-gray-600 mb-4">{task.description}</p>
-          <div className="flex justify-between items-center mb-4">
-            <span
-              className={`text-sm font-semibold ${
-                task.priority === "High"
-                  ? "text-red-600"
-                  : task.priority === "Medium"
-                  ? "text-yellow-600"
-                  : "text-green-600"
-              }`}
-            >
-              {task.priority} Priority
-            </span>
-            <span className="text-sm text-gray-500">{task.status}</span>
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">
-              Update Status
-            </label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="w-full p-2 border rounded"
-            >
-              <option value="Pending">Pending</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
-            </select>
-            <button
-              onClick={handleStatusUpdate}
-              className="mt-2 bg-blue-600 text-white p-2 rounded"
-            >
-              Update Status
-            </button>
-          </div>
+                <TaskInfo 
+                    isEditing={isEditing} 
+                    task={editedTask} 
+                    setTask={setEditedTask} 
+                    users={users} 
+                />
+
+<TaskComments 
+    comments={comments} 
+    newComment={newComment} 
+    setNewComment={setNewComment} 
+    commenterName={commenterName} 
+    setCommenterName={setCommenterName} 
+    setComments={setComments} 
+/>
+
+
+                <div className="mt-6">
+                    <Link to="/Task-Board">
+                        <Button className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                            Back to Tasks
+                        </Button>
+                    </Link>
+                </div>
+            </div>
+
+            {showDeleteModal && <DeleteConfirmationModal onConfirm={confirmDelete} onCancel={cancelDelete} />}
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Comments</h2>
-          <textarea
-            placeholder="Add a comment"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            className="w-full p-2 mb-4 border rounded"
-          />
-          <button
-            onClick={handleAddComment}
-            className="bg-blue-600 text-white p-2 rounded"
-          >
-            Add Comment
-          </button>
-          <div className="mt-4">
-            {task.comments?.map((comment, index) => (
-              <div key={index} className="mb-2 p-2 bg-gray-50 rounded">
-                <p>{comment}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }

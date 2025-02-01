@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -10,9 +11,9 @@ import TaskDetails from "./pages/TaskDetails";
 import Articles from "./pages/Articles";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import PrivateRoute from "./components/PrivateRoute";
-import Footer from "./components/Footer";
-
+import VerifyEmail from "./pages/VerifyEmail";
+import ProtectedRoute from "./components/ProtectedRoute";
+import TaskBoard from "./pages/TaskBoard";
 
 export default function App() {
   return (
@@ -23,31 +24,26 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/articles" element={<Articles />} />
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            }
-          />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/tasks" element={<TaskBoard />} />
           <Route
             path="/dashboard"
             element={
-              <PrivateRoute>
+              <ProtectedRoute>
                 <TaskDashboard />
-              </PrivateRoute>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/tasks/:taskId"
             element={
-              <PrivateRoute>
+              <ProtectedRoute>
                 <TaskDetails />
-              </PrivateRoute>
+              </ProtectedRoute>
             }
           />
         </Routes>

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase"; 
 import { onAuthStateChanged } from "firebase/auth";
+import { ref, get } from "firebase/database"; 
 
 const AuthContext = createContext();
 
@@ -8,10 +9,23 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => { //already in firebase to check status of user if login
+      if (user) {
+        const userRef = ref(db, `users/${user.uid}`); 
+        const snapshot = await get(userRef);
+
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          setUser({ ...user, ...userData }); 
+        } else {
+          setUser(user);
+        }
+      } else {
+        setUser(null); 
+      }
     });
-    return () => unsubscribe();
+
+    return () => unsubscribe(); 
   }, []);
 
   return (
