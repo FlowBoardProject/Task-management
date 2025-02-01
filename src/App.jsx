@@ -47,7 +47,7 @@ export default function App() {
             }
           />
         </Routes>
-        <Footer />
+        <Footer/>
       </AuthProvider>
     </Router>
   );
