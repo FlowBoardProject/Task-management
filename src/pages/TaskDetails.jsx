@@ -1,13 +1,11 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/Button";
-import { Input } from "../components/ui/Input";
 import { TaskHeader } from "../components/TaskHeader";
 import { TaskActions } from "../components/TaskActions";
 import { TaskInfo } from "../components/TaskInfo";
 import { DeleteConfirmationModal } from "../components/DeleteConfirmationModal";
 import { TaskComments } from "../components/TaskComments";
-import { Trash2 } from "lucide-react";
 
 const initialTasks = [
     { id: "1", title: "Design Homepage", description: "Create homepage UI", deadline: "2024-02-15", priority: "High", assignedTo: ["Alice"], status: "todo" },
@@ -29,10 +27,21 @@ export default function TaskDetails() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     useEffect(() => {
-        const foundTask = initialTasks.find(task => task.id === id);
+        console.log("Task ID from URL:", id); // Debugging
+
+        if (!id) {
+            console.error("❌ No task ID found in URL");
+            return;
+        }
+
+        // 🔥 Make sure `id` is a string to match task ID
+        const foundTask = initialTasks.find(task => task.id.toString() === id.toString());
+
         if (foundTask) {
             setTask(foundTask);
             setEditedTask({ ...foundTask });
+        } else {
+            console.warn("⚠️ Task not found for ID:", id);
         }
     }, [id]);
 
@@ -47,7 +56,7 @@ export default function TaskDetails() {
 
     const confirmDelete = () => {
         setShowDeleteModal(false);
-        navigate("/Task-Board");
+        navigate("/task-board");
     };
 
     const cancelDelete = () => {
@@ -77,18 +86,17 @@ export default function TaskDetails() {
                     users={users} 
                 />
 
-<TaskComments 
-    comments={comments} 
-    newComment={newComment} 
-    setNewComment={setNewComment} 
-    commenterName={commenterName} 
-    setCommenterName={setCommenterName} 
-    setComments={setComments} 
-/>
-
+                <TaskComments 
+                    comments={comments} 
+                    newComment={newComment} 
+                    setNewComment={setNewComment} 
+                    commenterName={commenterName} 
+                    setCommenterName={setCommenterName} 
+                    setComments={setComments} 
+                />
 
                 <div className="mt-6">
-                    <Link to="/Task-Board">
+                    <Link to="/tasks">
                         <Button className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
                             Back to Tasks
                         </Button>
