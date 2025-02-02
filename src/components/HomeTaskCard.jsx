@@ -1,27 +1,41 @@
 import React, { useState, useEffect } from "react";
-import { db } from "../firebase"; // تأكد من أن ملف firebase.js يحتوي على إعدادات قاعدة البيانات
+import { db } from "../firebase";
 import { ref, get } from "firebase/database";
+import { useAuth } from "../context/AuthContext";
+import { Clock, User, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Cards = () => {
+  const { user } = useAuth();
   const [cardList, setCardList] = useState([]);
-  const [visibleCount, setVisibleCount] = useState(3); // عدد العناصر التي ستظهر في البداية
-
+  const [visibleCount, setVisibleCount] = useState(3);
+  const navigate = useNavigate();
+  
   useEffect(() => {
+    if (!user) return;
+
     const fetchData = async () => {
-      const dbRef = ref(db, "tasks"); // مسار قاعدة البيانات
+      const dbRef = ref(db, "tasks");
       try {
         const snapshot = await get(dbRef);
         if (snapshot.exists()) {
           const data = snapshot.val();
-          const formattedData = Object.keys(data).map((key) => ({
-            id: key,
-            assignedTo: data[key].assignedTo,
-            priority: data[key].priority,
-            title: data[key].title,
-            description: data[key].description,
-            createdBy: data[key].createdBy,
-            deadline: data[key].deadline,
-          }));
+          const formattedData = Object.keys(data)
+            .map((key) => ({
+              id: key,
+              assignedTo: data[key].assignedTo || [],
+              priority: data[key].priority,
+              title: data[key].title,
+              description: data[key].description,
+              createdBy: data[key].createdBy,
+              deadline: data[key].deadline,
+            }))
+            .filter((task) =>
+              Array.isArray(task.assignedTo)
+                ? task.assignedTo.some((assignee) => assignee.id === user.uid)
+                : false
+            );
+
           setCardList(formattedData);
         } else {
           console.log("No data available");
@@ -32,49 +46,36 @@ const Cards = () => {
     };
 
     fetchData();
-  }, []);
+  }, [user]);
 
-  // وظيفة لإظهار المزيد من المهام
-  const showMore = () => {
-    setVisibleCount((prevCount) => prevCount + 3); // إضافة 3 مهام إضافية
-  };
+  const showMore = () => setVisibleCount((prevCount) => prevCount + 3);
+  const showLess = () => setVisibleCount((prevCount) => Math.max(prevCount - 3, 3));
 
-  // وظيفة لإخفاء المهام
-  const showLess = () => {
-    setVisibleCount((prevCount) => Math.max(prevCount - 3, 3)); // تقليص 3 مهام ولكن لا تذهب لأقل من 3
-  };
+  if (!user) {
+    return (
+      <div className="text-center text-gray-500 text-lg mt-10 mb-10">
+        Please log in to view your tasks.
+      </div>
+    );
+  }
 
   return (
     <>
-      <h1 className="text-4xl font-bold text-center mb-8"> Your Task </h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+      <h1 className="text-4xl font-extrabold text-center mb-10 text-gray-800">
+        Your Tasks 📋
+      </h1>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
         {cardList.slice(0, visibleCount).map((task) => (
           <div
             key={task.id}
-            className="max-w-md p-4 border rounded-lg shadow-lg bg-white"
+            className="relative bg-white/30 border border-gray-200 shadow-2xl rounded-3xl p-6 hover:shadow-3xl transition-all duration-300 backdrop-blur-xl hover:scale-105"
           >
-            <h2 className="text-xl font-bold text-gray-800">{task.title}</h2>
-            <p className="text-sm text-gray-500 mb-2">
-              Created By: <span className="text-gray-700">{task.createdBy}</span>
-            </p>
-            <p className="text-sm text-gray-500 mb-2">
-              Assigned To: <span className="text-gray-700">{task.assignedTo}</span>
-            </p>
-            <p className="text-sm text-gray-500 mb-2">
-              Deadline:{" "}
-              <span className="text-gray-700">
-                {task.deadline
-                  ? new Date(task.deadline).toLocaleDateString()
-                  : "N/A"}
-              </span>
-            </p>
-            <p className="text-sm text-gray-500 mb-2">
-              Description: <span className="text-gray-700">{task.description}</span>
-            </p>
-            <p className="text-sm text-gray-500">
-              Priority:{" "}
+            {/* - - - - - - - Header  - - - - - - - */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">{task.title}</h2>
               <span
-                className={`inline-block px-2 py-1 rounded-full text-white ${
+                className={`px-3 py-1 text-xs font-semibold uppercase rounded-full text-white ${
                   task.priority === "High"
                     ? "bg-red-500"
                     : task.priority === "Medium"
@@ -84,14 +85,50 @@ const Cards = () => {
               >
                 {task.priority}
               </span>
+            </div>
+
+            {/* - - - - - - - Task Meta Info - - - - - - - */}
+            <p className="text-sm text-gray-700 mb-2 flex items-center gap-1">
+              <User size={16} className="text-blue-500" />
+              <span className="font-medium">Created By:</span>
+              <span className="text-gray-800">{task.createdBy}</span>
             </p>
+
+            <p className="text-sm text-gray-700 mb-2 flex items-center gap-1">
+              <Clock size={16} className="text-purple-500" />
+              <span className="font-medium">Deadline:</span>
+              <span className="text-gray-800">
+                {task.deadline ? new Date(task.deadline).toLocaleDateString() : "N/A"}
+              </span>
+            </p>
+
+            <p className="text-sm text-gray-700 mb-4 line-clamp-2">
+              {task.description.length > 120
+                ? `${task.description.substring(0, 120)}...`
+                : task.description}
+            </p>
+
+            {/* - - - - - - - Bottom Actions - - - - - - - */}
+            <div className="flex justify-between items-center">
+              <button
+                className="text-white font-semibold px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg"
+                onClick={() => navigate("/dashboard")}
+              >
+                View Details
+              </button>
+
+              <Star size={22} className="text-yellow-500 animate-pulse" />
+            </div>
           </div>
         ))}
+      </div>
 
+      {/* - - - - - - - Show more / less buttons - - - - - - - */}
+      <div className="flex justify-center mt-8 gap-4">
         {visibleCount < cardList.length && (
           <button
             onClick={showMore}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+            className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 transition-all hover:scale-105"
           >
             Show more
           </button>
@@ -100,7 +137,7 @@ const Cards = () => {
         {visibleCount > 3 && (
           <button
             onClick={showLess}
-            className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700"
+            className="px-6 py-2 bg-gray-600 text-white font-semibold rounded-full shadow-lg hover:bg-gray-700 transition-all hover:scale-105"
           >
             Show less
           </button>
