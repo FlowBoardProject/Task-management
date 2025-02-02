@@ -1,28 +1,68 @@
 import { useEffect, useState } from "react";
+import { ref, update, get } from "firebase/database"; // ✅ Firebase functions
+import { db } from "../../firebase"; // ✅ Firebase instance
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { X, ChevronDown, User } from "lucide-react";
+import { getUsersByDepartment } from "../../services/userService"; // ✅ Fetch department users
 
-export default function EditTaskModal({ task, users, onSave, onClose }) {
-    const [updatedTask, setUpdatedTask] = useState(task);
+export default function EditTaskModal({ task, onSave, onClose }) {
+    const [updatedTask, setUpdatedTask] = useState({
+        ...task,
+        assignedTo: Array.isArray(task.assignedTo) ? task.assignedTo : [],
+    });
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [availableUsers, setAvailableUsers] = useState([]); // ✅ Store users from the department
 
+    // ✅ Fetch users assigned to the same department as the task
     useEffect(() => {
-        setUpdatedTask(task);
+        if (task.departments) {
+            console.log("🔍 Fetching users for department:", task.departments);
+            getUsersByDepartment(task.departments)
+                .then((users) => {
+                    console.log("✅ Users fetched:", users);
+                    setAvailableUsers(users);
+                })
+                .catch((err) => console.error("❌ Failed to fetch users:", err));
+        }
     }, [task]);
 
-    const handleSubmit = (e) => {
+    // ✅ Ensure assignedTo is properly structured
+    useEffect(() => {
+        setUpdatedTask({
+            ...task,
+            assignedTo: Array.isArray(task.assignedTo) ? task.assignedTo : [],
+        });
+    }, [task]);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSave(updatedTask);
+        
+        try {
+            // ✅ Update task in Firebase
+            const taskRef = ref(db, `tasks/${updatedTask.id}`);
+            await update(taskRef, { assignedTo: updatedTask.assignedTo });
+
+            console.log(`✅ Task ${updatedTask.id} updated successfully with assigned users`, updatedTask.assignedTo);
+
+            onSave(updatedTask);
+            onClose(); // ✅ Close modal after saving
+        } catch (error) {
+            console.error("❌ Error updating task:", error);
+        }
     };
 
-    const toggleUserSelection = (user) => {
-        setUpdatedTask((prevTask) => ({
-            ...prevTask,
-            assignedTo: prevTask.assignedTo.includes(user)
-                ? prevTask.assignedTo.filter((u) => u !== user) // Remove user
-                : [...prevTask.assignedTo, user], // Add user
-        }));
+    // ✅ Toggle user selection
+    const toggleUserSelection = (selectedUser) => {
+        setUpdatedTask((prevTask) => {
+            const isUserSelected = prevTask.assignedTo.some((user) => user.id === selectedUser.id);
+            const updatedAssignedTo = isUserSelected
+                ? prevTask.assignedTo.filter((user) => user.id !== selectedUser.id) // Remove user
+                : [...prevTask.assignedTo, selectedUser]; // Add user
+
+            console.log("📌 Updated assignedTo:", updatedAssignedTo);
+            return { ...prevTask, assignedTo: updatedAssignedTo };
+        });
     };
 
     return (
@@ -90,7 +130,7 @@ export default function EditTaskModal({ task, users, onSave, onClose }) {
                             className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-300 focus:border-blue-500 cursor-pointer flex items-center justify-between bg-white"
                         >
                             {updatedTask.assignedTo.length > 0 ? (
-                                <span>{updatedTask.assignedTo.join(", ")}</span>
+                                <span>{updatedTask.assignedTo.map(user => user.name).join(", ")}</span>
                             ) : (
                                 <span className="text-gray-400">Select team members</span>
                             )}
@@ -98,25 +138,28 @@ export default function EditTaskModal({ task, users, onSave, onClose }) {
                         </div>
 
                         {/* Dropdown Menu */}
-                        {dropdownOpen && (
+                        {dropdownOpen && availableUsers.length > 0 ? (
                             <div className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-2 z-10">
                                 <ul className="max-h-40 overflow-y-auto p-2">
-                                    {users.map((user) => (
+                                    {availableUsers.map(user => (
                                         <li
-                                            key={user}
+                                            key={user.id}
+                                            onClick={() => toggleUserSelection(user)}
                                             className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer"
                                         >
                                             <input
                                                 type="checkbox"
-                                                checked={updatedTask.assignedTo.includes(user)}
-                                                onChange={() => toggleUserSelection(user)}
+                                                checked={updatedTask.assignedTo.some(u => u.id === user.id)}
                                                 className="w-4 h-4"
+                                                readOnly
                                             />
-                                            {user}
+                                            {user.firstName} {user.lastName}
                                         </li>
                                     ))}
                                 </ul>
                             </div>
+                        ) : (
+                            <p className="text-gray-500 text-sm p-2">No users available</p>
                         )}
                     </div>
 

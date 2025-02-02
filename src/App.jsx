@@ -39,7 +39,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
+<Route
     path="/tasks/:id"
     element={
         <ProtectedRoute>
@@ -47,6 +47,7 @@ export default function App() {
         </ProtectedRoute>
     }
 />
+
 
         </Routes>
         <Footer/>

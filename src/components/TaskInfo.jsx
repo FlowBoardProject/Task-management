@@ -1,18 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "../components/ui/Input";
 import { User, Flag, ChevronDown } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { getUsersByDepartment } from "../services/userService";
 
-export function TaskInfo({ isEditing, task, setTask, users }) {
+export function TaskInfo({ isEditing, task, setTask }) {
+    const { user } = useAuth();
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [departmentUsers, setDepartmentUsers] = useState([]);
 
-    const toggleUserSelection = (user) => {
-        setTask((prevTask) => ({
-            ...prevTask,
-            assignedTo: prevTask.assignedTo.includes(user)
-                ? prevTask.assignedTo.filter((u) => u !== user) // Remove user
-                : [...prevTask.assignedTo, user], // Add user
-        }));
+    // ✅ Ensure task.assignedTo is always an array
+    useEffect(() => {
+        if (!task.assignedTo || !Array.isArray(task.assignedTo)) {
+            setTask(prev => ({ ...prev, assignedTo: [] }));
+        }
+    }, [task, setTask]);
+
+    // ✅ Fetch users from the same department
+    useEffect(() => {
+        if (user?.departments) {
+            getUsersByDepartment(user.departments)
+                .then((users) => setDepartmentUsers(users))
+                .catch(() => console.error("❌ Failed to load department users."));
+        }
+    }, [user]);
+
+    // ✅ Toggle user selection (assign/unassign)
+    const toggleUserSelection = (selectedUser) => {
+        if (!selectedUser.id || !selectedUser.fullName) {
+            console.error("❌ Invalid user data", selectedUser);
+            return;
+        }
+    
+        setTask((prevTask) => {
+            const isUserSelected = prevTask.assignedTo.some(user => user.id === selectedUser.id);
+            const updatedAssignedTo = isUserSelected
+                ? prevTask.assignedTo.filter(user => user.id !== selectedUser.id) // Unassign user
+                : [...prevTask.assignedTo, { id: selectedUser.id, name: selectedUser.fullName }]; // ✅ Use fullName correctly
+    
+            console.log("✅ Updated assignedTo:", updatedAssignedTo);
+            return { ...prevTask, assignedTo: updatedAssignedTo };
+        });
     };
+    
 
     return (
         <div className="space-y-3">
@@ -74,11 +104,11 @@ export function TaskInfo({ isEditing, task, setTask, users }) {
                     <div className="relative">
                         <div
                             onClick={() => setDropdownOpen(!dropdownOpen)}
-                            className="w-full p-3 border border-gray-300 rounded-lg cursor-pointer flex items-center justify-between focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
+                            className="w-full p-3 border border-gray-300 rounded-lg cursor-pointer flex items-center justify-between"
                         >
-                            {task.assignedTo.length > 0
-                                ? task.assignedTo.join(", ")
-                                : "Select team members"}
+            {task.assignedTo.length > 0
+                ? task.assignedTo.map(user => user.name).join(", ")
+                : "Select team members"}
                             <ChevronDown className="w-4 h-4 text-gray-500" />
                         </div>
 
@@ -86,26 +116,32 @@ export function TaskInfo({ isEditing, task, setTask, users }) {
                         {dropdownOpen && (
                             <div className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-2 z-10">
                                 <ul className="max-h-40 overflow-y-auto p-2">
-                                    {users.map((user) => (
-                                        <li
-                                            key={user}
-                                            className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer"
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={task.assignedTo.includes(user)}
-                                                onChange={() => toggleUserSelection(user)}
-                                                className="w-4 h-4"
-                                            />
-                                            {user}
-                                        </li>
-                                    ))}
+                                {departmentUsers.length > 0 ? (
+                        departmentUsers.map(user => (
+                            <li 
+                                                key={user.id} 
+                                                className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer"
+                                                onClick={() => toggleUserSelection(user)}
+                                                >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={task.assignedTo.some(u => u.id === user.id)}
+                                                    className="w-4 h-4"
+                                                />
+                                                {user.firstName && user.lastName 
+                                    ? `${user.firstName} ${user.lastName}`
+                                    : "Unknown User"}
+                                            </li>
+                                        ))
+                                    ) : (
+                                        <li className="p-2 text-gray-500">No users available</li>
+                                    )}
                                 </ul>
                             </div>
                         )}
                     </div>
                 ) : (
-                    <p className="text-gray-700">{task.assignedTo.join(", ")}</p>
+                    <p className="text-gray-700">{task.assignedTo.map(user => user.name).join(", ")}</p>
                 )}
             </div>
         </div>

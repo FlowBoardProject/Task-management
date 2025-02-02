@@ -1,16 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext"; 
+import { getTasksFromFirebase, updateTaskStatusInFirebase } from "../services/taskService"; 
 import CreateTaskForm from "../components/CreateTaskForm";
 import EditTaskModal from "../components/ui/EditTaskModal";
 import TaskColumn from "../components/TaskColumn";
-import TaskFilters from "../components/TaskFilters";  // ✅ Import new filter component
-import TaskCard from "../components/TaskCard"; // ✅ Import TaskCard for List View
+import TaskFilters from "../components/TaskFilters";  
+import TaskCard from "../components/TaskCard";
 import moveTask from "../utils/MoveTask";
-
-const initialTasks = [
-    { id: "1", title: "Design Homepage", deadline: "2024-02-15", priority: "High", assignedTo: ["Alice"], status: "todo" },
-    { id: "2", title: "Implement Login", deadline: "2024-02-20", priority: "Medium", assignedTo: ["Bob"], status: "in-progress" },
-    { id: "3", title: "Test API Endpoints", deadline: "2024-02-25", priority: "Low", assignedTo: ["Charlie"], status: "done" },
-];
 
 const statusConfig = {
     todo: { label: "To Do", color: "from-blue-50 to-blue-100" },
@@ -18,23 +14,70 @@ const statusConfig = {
     done: { label: "Done", color: "from-green-50 to-green-100" }
 };
 
-const users = ["Alice", "Bob", "Charlie", "Dave", "Eve"];
-
 export default function TaskBoard() {
-    const [tasks, setTasks] = useState(initialTasks);
+    const { user } = useAuth(); 
+    const [tasks, setTasks] = useState([]);
     const [editTask, setEditTask] = useState(null);
     const [notification, setNotification] = useState("");
-    const [viewMode, setViewMode] = useState("grid"); // ✅ Grid or List view mode
+    const [viewMode, setViewMode] = useState("grid");
 
-    // ✅ Filter state
+    // ✅ Define filters
     const [filterCategory, setFilterCategory] = useState("all");
     const [filterPriority, setFilterPriority] = useState("all");
     const [sortOrder, setSortOrder] = useState("asc");
 
-    const handleMoveTask = (taskId, direction) => {
-        moveTask(tasks, setTasks, taskId, direction, statusConfig);
-        showNotification("Task moved!");
+    // ✅ Fetch tasks from Firebase
+    useEffect(() => {
+        if (user && user.departments) {
+            fetchUserTasks();
+        }
+    }, [user]);
+
+    const fetchUserTasks = async () => {
+        try {
+            const allTasks = await getTasksFromFirebase();
+            const departmentTasks = allTasks
+                .filter(task => task.departments === user.departments)
+                .map(task => ({
+                    ...task,
+                    status: typeof task.status === "string" ? task.status.toLowerCase() : "todo", // ✅ Ensure status is a string
+                }));
+    
+            setTasks(departmentTasks);
+            console.log("✅ Tasks for department loaded:", departmentTasks);
+        } catch (error) {
+            console.error("❌ Error loading tasks:", error);
+        }
     };
+    
+    
+
+    const handleMoveTask = (taskId, direction) => {
+        setTasks((prevTasks) =>
+            prevTasks.map((task) => {
+                if (task.id === taskId) {
+                    const statusKeys = Object.keys(statusConfig);
+                    const currentIndex = statusKeys.indexOf(task.status);
+                    const newIndex = currentIndex + direction;
+    
+                    if (newIndex >= 0 && newIndex < statusKeys.length) {
+                        const newStatus = statusKeys[newIndex];
+    
+                        // ✅ Ensure newStatus is a string before updating Firebase
+                        if (typeof newStatus === "string") {
+                            updateTaskStatusInFirebase(taskId, newStatus);
+                            showNotification(`Task moved to ${newStatus.replace("-", " ")}`);
+                        }
+    
+                        return { ...task, status: newStatus };
+                    }
+                }
+                return task;
+            })
+        );
+    };
+    
+    
 
     const handleDeleteTask = (taskId) => {
         setTasks((prevTasks) => prevTasks.filter(task => task.id !== taskId));
@@ -67,7 +110,7 @@ export default function TaskBoard() {
             {editTask && (
                 <EditTaskModal
                     task={editTask}
-                    users={users}
+                    users={[]} 
                     onSave={(updatedTask) => {
                         setTasks(tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
                         setEditTask(null);
@@ -78,10 +121,9 @@ export default function TaskBoard() {
 
             <CreateTaskForm 
                 onAddTask={(task) => setTasks([...tasks, { id: Date.now().toString(), ...task, status: "todo" }])} 
-                users={users} 
+                users={[user.email]} 
             />
 
-            {/* ✅ Filters & View Mode Toggle */}
             <TaskFilters 
                 filterCategory={filterCategory} 
                 setFilterCategory={setFilterCategory}
@@ -93,22 +135,24 @@ export default function TaskBoard() {
                 setViewMode={setViewMode}
             />
 
-            {/* ✅ Conditional Rendering for Grid/List View */}
             {viewMode === "grid" ? (
                 <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 items-start grid-auto-rows-min">
-                    {Object.entries(statusConfig).map(([statusKey, { label, color }]) => (
-                        <TaskColumn
-                            key={statusKey}
-                            statusKey={statusKey}
-                            label={label}
-                            color={color}
-                            tasks={filteredTasks.filter(task => task.status === statusKey)}
-                            setTasks={setTasks}
-                            setEditTask={setEditTask}
-                            onMoveTask={handleMoveTask}
-                            onDeleteTask={handleDeleteTask}
-                        />
-                    ))}
+{Object.entries(statusConfig).map(([statusKey, { label, color }]) => (
+    <TaskColumn
+        key={statusKey}
+        statusKey={statusKey}
+        label={label}
+        color={color}
+        tasks={filteredTasks.filter(task => 
+            typeof task.status === "string" && task.status.toLowerCase() === statusKey
+        )}
+        setTasks={setTasks}
+        setEditTask={setEditTask}
+        onMoveTask={handleMoveTask}
+        onDeleteTask={handleDeleteTask}
+    />
+))}
+
                 </div>
             ) : (
                 <div className="max-w-6xl mx-auto mt-6 space-y-4">

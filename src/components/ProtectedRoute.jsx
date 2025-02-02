@@ -76,11 +76,6 @@ const ProtectedRoute = ({ children }) => {
   console.log("User role after loading:", userRole);
   console.log("Email verified:", emailVerified);
 
-  if (userRole !== "manager") {
-    console.log("Redirecting to / because role is not manager");
-    return <Navigate to="/" replace />;
-  }
-
   if (!emailVerified) {
     console.log("Redirecting to /verify-email because email is not verified");
     return <Navigate to="/verify-email" replace />;
