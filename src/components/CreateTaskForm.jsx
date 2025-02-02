@@ -25,7 +25,7 @@ export default function CreateTaskForm({ onAddTask, users }) {
     useEffect(() => {
         if (user?.departments) {
             console.log("🔍 Fetching users for department:", user.departments);
-    
+
             getUsersByDepartment(user.departments)
                 .then((users) => {
                     if (Array.isArray(users) && users.length > 0) {
@@ -39,37 +39,37 @@ export default function CreateTaskForm({ onAddTask, users }) {
                 .catch(() => setError("❌ Failed to load department users."));
         }
     }, [user]);
-    
 
-    
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         if (!newTask.title.trim() || !newTask.description.trim() || !newTask.deadline.trim() || newTask.assignedTo.length === 0) {
             setError("Please fill in all fields before submitting.");
             return;
         }
-    
+
         if (!user) {
             setError("You must be logged in to create a task.");
             return;
         }
-    
+
         setLoading(true);
         setError("");
-    
+
         try {
-            const taskData = { 
-                ...newTask, 
-                createdBy: user.uid, 
+            const taskData = {
+                ...newTask,
+                createdBy: user.uid,
                 departments: user.departments
             };
-    
+
             console.log("📌 Task being sent to Firebase:", taskData); // ✅ Debugging log
-    
+
             const taskId = await addTaskToFirebase(taskData);
             onAddTask({ id: taskId, ...taskData });
-    
+
             setNewTask({
                 title: "",
                 description: "",
@@ -83,23 +83,23 @@ export default function CreateTaskForm({ onAddTask, users }) {
             setLoading(false);
         }
     };
-    
+
 
     const toggleUserSelection = (selectedUserFullName) => {
         setNewTask((prevTask) => {
             const updatedAssignedTo = prevTask.assignedTo.includes(selectedUserFullName)
                 ? prevTask.assignedTo.filter((name) => name !== selectedUserFullName)
                 : [...prevTask.assignedTo, selectedUserFullName];
-    
+
             console.log("📌 Updated assignedTo:", updatedAssignedTo); // ✅ Debugging log
-    
+
             return {
                 ...prevTask,
                 assignedTo: updatedAssignedTo,
             };
         });
     };
-    
+
 
     return (
         <div className="max-w-2xl mx-auto mb-8 p-8 bg-gradient-to-br from-white to-blue-50 rounded-3xl shadow-2xl border">
@@ -172,15 +172,15 @@ export default function CreateTaskForm({ onAddTask, users }) {
                     </select>
                 </div>
 
-                 {/* Assign To (Filtered by Department) */}
-                 <div className="space-y-1 relative">
+                {/* Assign To (Filtered by Department) */}
+                <div className="space-y-1 relative">
                     <label className="text-sm font-medium text-gray-600 flex items-center gap-2">
                         <User className="w-4 h-4 text-green-500" />
                         Assign To
                     </label>
                     <div className="relative">
-                        <div 
-                            onClick={() => setDropdownOpen(!dropdownOpen)} 
+                        <div
+                            onClick={() => setDropdownOpen(!dropdownOpen)}
                             className="cursor-pointer flex items-center justify-between p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-200"
                         >
                             {newTask.assignedTo.length > 0 ? <span>{newTask.assignedTo.join(", ")}</span> : <span className="text-gray-400">Select team members</span>}
@@ -190,24 +190,24 @@ export default function CreateTaskForm({ onAddTask, users }) {
                         {dropdownOpen && (
                             <div className="absolute top-full left-0 w-full bg-white border rounded-lg shadow-lg mt-2 z-10">
                                 <ul className="max-h-40 overflow-y-auto p-2">
-                                {filteredUsers.length > 0 ? (
-    filteredUsers.map((teamMember) => {
-        const fullName = `${teamMember.firstName || ""} ${teamMember.lastName || ""}`.trim(); // ✅ Use full name
+                                    {filteredUsers.length > 0 ? (
+                                        filteredUsers.map((teamMember) => {
+                                            const fullName = `${teamMember.firstName || ""} ${teamMember.lastName || ""}`.trim(); // ✅ Use full name
 
-        return fullName ? (
-            <li key={teamMember.id} className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer">
-                <input 
-                    type="checkbox" 
-                    checked={newTask.assignedTo.includes(fullName)} 
-                    onChange={() => toggleUserSelection(fullName)} 
-                />
-                {fullName}
-            </li>
-        ) : null;
-    })
-) : (
-    <li className="p-2 text-gray-500">No users available</li>
-)}
+                                            return fullName ? (
+                                                <li key={teamMember.id} className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={newTask.assignedTo.includes(fullName)}
+                                                        onChange={() => toggleUserSelection(fullName)}
+                                                    />
+                                                    {fullName}
+                                                </li>
+                                            ) : null;
+                                        })
+                                    ) : (
+                                        <li className="p-2 text-gray-500">No users available</li>
+                                    )}
 
                                 </ul>
                             </div>

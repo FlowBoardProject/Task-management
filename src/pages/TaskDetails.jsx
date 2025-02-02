@@ -2,12 +2,13 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/Button";
 import { db } from "../firebase"; 
-import { ref, get } from "firebase/database";
+import { ref, get, onValue } from "firebase/database";
 import { TaskHeader } from "../components/TaskHeader";
 import { TaskActions } from "../components/TaskActions";
 import { TaskInfo } from "../components/TaskInfo";
 import { DeleteConfirmationModal } from "../components/DeleteConfirmationModal";
 import { TaskComments } from "../components/TaskComments";
+import { updateTaskInFirebase } from "../services/taskService";
 
 export default function TaskDetails() {
     const { id } = useParams();
@@ -20,39 +21,56 @@ export default function TaskDetails() {
     const [editedTask, setEditedTask] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    useEffect(() => {
-        console.log("Task ID from URL:", id);
 
-        if (!id) {
-            console.error("❌ No task ID found in URL");
-            return;
-        }
+    
+// Inside TaskDetails component
+useEffect(() => {
+    if (!id) return;
 
-        // 🔥 Fetch task from Firebase
-        const fetchTask = async () => {
-            try {
-                const taskRef = ref(db, `tasks/${id}`);
-                const snapshot = await get(taskRef);
+    const fetchTask = async () => {
+        try {
+            const taskRef = ref(db, `tasks/${id}`);
+            const snapshot = await get(taskRef);
 
-                if (snapshot.exists()) {
-                    const taskData = snapshot.val();
-                    setTask({ id, ...taskData });
-                    setEditedTask({ id, ...taskData });
-                } else {
-                    console.warn("⚠️ Task not found for ID:", id);
-                    navigate("/tasks"); // Redirect back if not found
-                }
-            } catch (error) {
-                console.error("❌ Error fetching task:", error);
+            if (snapshot.exists()) {
+                const taskData = snapshot.val();
+                setTask({ id, ...taskData });
+                setEditedTask({ id, ...taskData });
+            } else {
+                console.warn("⚠️ Task not found");
+                navigate("/tasks");
             }
-        };
+        } catch (error) {
+            console.error("❌ Error fetching task:", error);
+        }
+    };
 
-        fetchTask();
-    }, [id, navigate]);
+    // Fetch comments in real time
+    const commentsRef = ref(db, `tasks/${id}/comments`);
+    const unsubscribe = onValue(commentsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const commentsData = snapshot.val();
+            const commentsList = Object.values(commentsData);
+            setComments(commentsList);
+        } else {
+            setComments([]); // No comments
+        }
+    });
 
-    const handleSaveEdit = () => {
-        setTask(editedTask);
-        setIsEditing(false);
+    fetchTask();
+
+    return () => unsubscribe(); // Cleanup Firebase listener
+}, [id, navigate]);
+
+    const handleSaveEdit = async () => {
+        try {
+            await updateTaskInFirebase(editedTask.id, editedTask);
+            setTask(editedTask); // Update local state
+            setIsEditing(false);
+            console.log("✅ Task updated successfully in Firebase");
+        } catch (error) {
+            console.error("❌ Error updating task:", error);
+        }
     };
 
     const handleDeleteTask = () => {
@@ -92,6 +110,7 @@ export default function TaskDetails() {
                 />
 
                 <TaskComments 
+                    taskId={task?.id}
                     comments={comments} 
                     newComment={newComment} 
                     setNewComment={setNewComment} 
