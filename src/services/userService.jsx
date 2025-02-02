@@ -16,18 +16,16 @@ export const getUsersByDepartment = async (department) => {
         const usersData = snapshot.val();
         const users = Object.entries(usersData).map(([id, userData]) => ({
             id,
-            fullName: `${userData.firstName || ""} ${userData.lastName || ""}`.trim(), // ✅ Store full name
+            fullName: userData.fullName || `${userData.firstName || ""} ${userData.lastName || ""}`.trim(), // ✅ Ensure fullName exists
             ...userData,
         }));
 
-        // ✅ Filter users based on department match
-        const filteredUsers = users.filter((user) => user.departments === department);
+        const filteredUsers = users.filter(user => user.departments === department);
 
-        console.log(`✅ Found ${filteredUsers.length} users in department: ${department}`, filteredUsers);
+        console.log(`✅ Found ${filteredUsers.length} users in department: ${department}, filteredUsers`);
         return filteredUsers;
     } catch (error) {
         console.error("❌ Error fetching department users:", error);
         return [];
     }
 };
-

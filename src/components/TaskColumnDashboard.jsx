@@ -1,6 +1,6 @@
-import TaskCard from "./TaskCard";
+import TaskCard from "./TaskCardDashboard";
 
-export default function TaskColumn({ statusKey, label, color, tasks, setEditTask, onMoveTask, onDeleteTask }) {
+export default function TaskColumn({ statusKey, label, color, tasks, onMoveTask, onDeleteTask }) {
     const filteredTasks = tasks.filter(task => task.status && String(task.status).toLowerCase() === statusKey);
 
     return (
@@ -12,7 +12,6 @@ export default function TaskColumn({ statusKey, label, color, tasks, setEditTask
                         <TaskCard 
                             key={task.id} 
                             task={task} 
-                            setEditTask={setEditTask} 
                             onMoveTask={onMoveTask} 
                             onDeleteTask={onDeleteTask} 
                         />

@@ -1,105 +1,90 @@
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
-import { addTaskToFirebase } from "../services/taskService"; // ✅ Import correctly
-import { useAuth } from "../context/AuthContext"; // ✅ Use Auth Context
-import { getUsersByDepartment } from "../services/userService"; // ✅ Fetch users by department
+import { addTaskToFirebase } from "../services/taskService"; 
+import { useAuth } from "../context/AuthContext"; 
+import { getUsersByDepartment } from "../services/userService"; 
 
 import { Calendar, User, Flag, Rocket, ChevronDown } from "lucide-react";
 
-export default function CreateTaskForm({ onAddTask, users }) {
+export default function CreateTaskForm({ onAddTask }) {
     const [newTask, setNewTask] = useState({
         title: "",
         description: "",
         deadline: "",
         priority: "Medium",
-        assignedTo: [],
+        assignedTo: [], // ✅ Store as [{ id: "userId", name: "User Name" }]
     });
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const { user } = useAuth(); // ✅ Get logged-in user
-    const [filteredUsers, setFilteredUsers] = useState([]); // ✅ Store users from the same department
+    const { user } = useAuth(); 
+    const [filteredUsers, setFilteredUsers] = useState([]);
 
+    // ✅ Fetch users based on the current user's department
     useEffect(() => {
         if (user?.departments) {
             console.log("🔍 Fetching users for department:", user.departments);
-    
             getUsersByDepartment(user.departments)
-                .then((users) => {
-                    if (Array.isArray(users) && users.length > 0) {
-                        console.log("✅ Users fetched:", users);  // ✅ Debugging step
-                        setFilteredUsers(users);
-                    } else {
-                        setFilteredUsers([]);
-                        setError("⚠ No users found in your department.");
-                    }
-                })
+                .then((users) => setFilteredUsers(users))
                 .catch(() => setError("❌ Failed to load department users."));
         }
     }, [user]);
-    
 
-    
+    // ✅ Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
-        if (!newTask.title.trim() || !newTask.description.trim() || !newTask.deadline.trim() || newTask.assignedTo.length === 0) {
-            setError("Please fill in all fields before submitting.");
+
+        if (!newTask.title || !newTask.description || !newTask.deadline || newTask.assignedTo.length === 0) {
+            setError("Please fill in all fields.");
             return;
         }
-    
+
         if (!user) {
             setError("You must be logged in to create a task.");
             return;
         }
-    
+
         setLoading(true);
         setError("");
-    
+
         try {
-            const taskData = { 
-                ...newTask, 
-                createdBy: user.uid, 
-                departments: user.departments
+            const taskData = {
+                ...newTask,
+                createdBy: user.uid,
+                departments: user.departments,
+                assignedTo: newTask.assignedTo.map((user) => ({
+                    id: user.id, 
+                    name: user.name 
+                })), // ✅ Ensure correct structure
             };
-    
-            console.log("📌 Task being sent to Firebase:", taskData); // ✅ Debugging log
-    
+
+            console.log("📌 Task being sent to Firebase:", taskData);
             const taskId = await addTaskToFirebase(taskData);
             onAddTask({ id: taskId, ...taskData });
-    
-            setNewTask({
-                title: "",
-                description: "",
-                deadline: "",
-                priority: "Medium",
-                assignedTo: [],
-            });
+
+            // ✅ Reset form
+            setNewTask({ title: "", description: "", deadline: "", priority: "Medium", assignedTo: [] });
         } catch (err) {
             setError("Failed to save task. Please try again.");
         } finally {
             setLoading(false);
         }
     };
-    
 
-    const toggleUserSelection = (selectedUserFullName) => {
+    // ✅ Toggle user selection
+    const toggleUserSelection = (selectedUser) => {
         setNewTask((prevTask) => {
-            const updatedAssignedTo = prevTask.assignedTo.includes(selectedUserFullName)
-                ? prevTask.assignedTo.filter((name) => name !== selectedUserFullName)
-                : [...prevTask.assignedTo, selectedUserFullName];
-    
-            console.log("📌 Updated assignedTo:", updatedAssignedTo); // ✅ Debugging log
-    
-            return {
-                ...prevTask,
-                assignedTo: updatedAssignedTo,
-            };
+            const isUserSelected = prevTask.assignedTo.some((user) => user.id === selectedUser.id);
+            const updatedAssignedTo = isUserSelected
+                ? prevTask.assignedTo.filter((user) => user.id !== selectedUser.id)
+                : [...prevTask.assignedTo, selectedUser];
+
+            console.log("📌 Updated assignedTo:", updatedAssignedTo);
+            return { ...prevTask, assignedTo: updatedAssignedTo };
         });
     };
-    
 
     return (
         <div className="max-w-2xl mx-auto mb-8 p-8 bg-gradient-to-br from-white to-blue-50 rounded-3xl shadow-2xl border">
@@ -123,6 +108,7 @@ export default function CreateTaskForm({ onAddTask, users }) {
                         value={newTask.title}
                         onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                         placeholder="Enter task title..."
+                        required
                         className="border-gray-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 rounded-xl"
                     />
                 </div>
@@ -137,6 +123,7 @@ export default function CreateTaskForm({ onAddTask, users }) {
                         onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
                         placeholder="Enter task description..."
                         rows="4"
+                        required
                         className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
                     ></textarea>
                 </div>
@@ -151,6 +138,7 @@ export default function CreateTaskForm({ onAddTask, users }) {
                         type="date"
                         value={newTask.deadline}
                         onChange={(e) => setNewTask({ ...newTask, deadline: e.target.value })}
+                        required
                         className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-300 focus:border-purple-500"
                     />
                 </div>
@@ -172,43 +160,31 @@ export default function CreateTaskForm({ onAddTask, users }) {
                     </select>
                 </div>
 
-                 {/* Assign To (Filtered by Department) */}
-                 <div className="space-y-1 relative">
+                {/* Assign To */}
+                <div className="space-y-1 relative">
                     <label className="text-sm font-medium text-gray-600 flex items-center gap-2">
                         <User className="w-4 h-4 text-green-500" />
                         Assign To
                     </label>
                     <div className="relative">
-                        <div 
-                            onClick={() => setDropdownOpen(!dropdownOpen)} 
-                            className="cursor-pointer flex items-center justify-between p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-200"
-                        >
-                            {newTask.assignedTo.length > 0 ? <span>{newTask.assignedTo.join(", ")}</span> : <span className="text-gray-400">Select team members</span>}
-                            <ChevronDown className="w-4 h-4 text-gray-500" />
+                        <div onClick={() => setDropdownOpen(!dropdownOpen)} className="cursor-pointer border p-2 rounded-md">
+                            {newTask.assignedTo.length > 0 ? newTask.assignedTo.map((user) => user.name).join(", ") : "Select team members"}
+                            <ChevronDown className="inline-block ml-2" />
                         </div>
 
                         {dropdownOpen && (
                             <div className="absolute top-full left-0 w-full bg-white border rounded-lg shadow-lg mt-2 z-10">
                                 <ul className="max-h-40 overflow-y-auto p-2">
-                                {filteredUsers.length > 0 ? (
-    filteredUsers.map((teamMember) => {
-        const fullName = `${teamMember.firstName || ""} ${teamMember.lastName || ""}`.trim(); // ✅ Use full name
-
-        return fullName ? (
-            <li key={teamMember.id} className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer">
-                <input 
-                    type="checkbox" 
-                    checked={newTask.assignedTo.includes(fullName)} 
-                    onChange={() => toggleUserSelection(fullName)} 
-                />
-                {fullName}
-            </li>
-        ) : null;
-    })
-) : (
-    <li className="p-2 text-gray-500">No users available</li>
-)}
-
+                                    {filteredUsers.map((teamMember) => (
+                                        <li key={teamMember.id} className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={newTask.assignedTo.some((user) => user.id === teamMember.id)}
+                                                onChange={() => toggleUserSelection({ id: teamMember.id, name: teamMember.fullName })}
+                                            />
+                                            {teamMember.fullName}
+                                        </li>
+                                    ))}
                                 </ul>
                             </div>
                         )}
