@@ -124,9 +124,9 @@ export default function Login() {
         }).then(() => {
           // Redirect to /dashboard if the role is "manager"
           if (userData.role === "manager") {
-            navigate("/dashboard");
+            navigate("/tasks");
           } else {
-            navigate("/");
+            navigate("/dashboard");
           }
         });
       } else {

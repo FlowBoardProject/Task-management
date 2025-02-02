@@ -27,13 +27,13 @@ function Articles() {
     onValue(articlesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const articlesArray = Object.keys(data).map((key) => ({
+        const articlesArray = Object.keys(data).map((key) => ({ // convert data to array having keys
           id: key,
-          ...data[key],
+          ...data[key], // the result is array having all articles instead of json
         }));
         setArticles(
           articlesArray.sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt) // if plus dont replace if minus replace so the result article from newest
           )
         );
       } else {

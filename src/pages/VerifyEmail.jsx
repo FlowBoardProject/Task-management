@@ -37,7 +37,7 @@ export default function VerifyEmail() {
           });
         }
       } else {
-        navigate("/login"); // Redirect to login if no user is found
+        navigate("/"); // Redirect to home if no user is found
       }
     };
 

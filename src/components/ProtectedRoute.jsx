@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { auth, db } from "../firebase";
 import { ref, get } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
@@ -40,6 +40,7 @@ const ProtectedRoute = ({ children }) => {
   const [userRole, setUserRole] = useState(null);
   const [emailVerified, setEmailVerified] = useState(false);
   const [loading, setLoading] = useState(true);
+  const location = useLocation(); // Get the current route location
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -76,16 +77,30 @@ const ProtectedRoute = ({ children }) => {
   console.log("User role after loading:", userRole);
   console.log("Email verified:", emailVerified);
 
-  if (userRole !== "manager") {
-    console.log("Redirecting to / because role is not manager");
-    return <Navigate to="/" replace />;
-  }
-
+  // Redirect if email is not verified
   if (!emailVerified) {
     console.log("Redirecting to /verify-email because email is not verified");
     return <Navigate to="/verify-email" replace />;
   }
 
+  // Check if the user is trying to access a restricted route
+  const isTasksPage = location.pathname === "/tasks";
+
+  // If the user is a team member and trying to access the Tasks page, redirect to Dashboard
+  if (userRole === "team-member" && isTasksPage) {
+    console.log(
+      "Redirecting to /dashboard because team members cannot access tasks"
+    );
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // If the user is not a manager or team member, redirect to home
+  if (userRole !== "manager" && userRole !== "team-member") {
+    console.log("Redirecting to / because role is not manager or team-member");
+    return <Navigate to="/" replace />;
+  }
+
+  // Allow access to the requested route
   return children;
 };
 
