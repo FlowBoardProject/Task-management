@@ -1,3 +1,5 @@
+
+
 export default function Articles() {
   return (
     <div className="min-h-screen bg-gray-100 p-6">

@@ -14,7 +14,7 @@ import Contact from "./pages/Contact";
 import VerifyEmail from "./pages/VerifyEmail";
 import ProtectedRoute from "./components/ProtectedRoute";
 import TaskBoard from "./pages/TaskBoard";
-
+import TermsAndConditions from "./pages/TermsAndConditions";
 export default function App() {
   return (
     <Router>
@@ -29,7 +29,8 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/articles" element={<Articles />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/tasks" element={<TaskBoard />} />
+          <Route path="/tasks" element={<ProtectedRoute><TaskBoard /></ProtectedRoute>} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route
             path="/dashboard"
             element={
@@ -39,13 +40,14 @@ export default function App() {
             }
           />
           <Route
-            path="/tasks/:taskId"
-            element={
-              <ProtectedRoute>
-                <TaskDetails />
-              </ProtectedRoute>
-            }
-          />
+    path="/tasks/:id"
+    element={
+        <ProtectedRoute>
+            <TaskDetails />
+        </ProtectedRoute>
+    }
+/>
+
         </Routes>
         <Footer/>
       </AuthProvider>
