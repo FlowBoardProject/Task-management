@@ -90,21 +90,7 @@ export default function Navbar() {
 
           {/* Right Section */}
           <div className="flex items-center space-x-6">
-            {/* Search Bar */}
-            <div
-              className={`hidden lg:block relative ${
-                isSearchActive ? "w-64" : "w-48"
-              } transition-all duration-300`}
-            >
-              <input
-                type="text"
-                placeholder="Search tasks..."
-                onFocus={() => setIsSearchActive(true)}
-                onBlur={() => setIsSearchActive(false)}
-                className="w-full py-2 pl-10 pr-4 text-sm text-gray-700 bg-gray-50 rounded-full border-none focus:ring-2 focus:ring-blue-500 transition-all"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            </div>
+         
 
             {/* User Section */}
             {user ? (

@@ -98,6 +98,7 @@ export default function Register() {
 
       // Use Axios to store the data in the Realtime Database
       await axios.put(dbUrl, userData);
+       localStorage.setItem("user", JSON.stringify(userData));
 
       // Show success message and prompt the user to verify their email
       Swal.fire({
@@ -359,7 +360,7 @@ export default function Register() {
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                 >
                   <option value="">Select a department</option>
-                  <option value="It">IT</option>
+                  <option value="IT">IT</option>
                   <option value="Front-End department">
                     Front-End department
                   </option>

@@ -1,65 +1,76 @@
-import { useState } from "react";
-import { db } from "../firebase";
-import { collection, addDoc } from "firebase/firestore";
-import { toast } from "react-toastify";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
-export default function TaskForm() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("Low");
+// Validation schema
+const schema = yup.object().shape({
+  title: yup.string().required("Title is required"),
+  description: yup.string().required("Description is required"),
+  priority: yup.string().required("Priority is required"),
+  deadline: yup.date().required("Deadline is required"),
+});
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!title || !description) {
-      toast.error("Please fill all fields");
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, "tasks"), {
-        title,
-        description,
-        priority,
-        status: "Pending",
-        createdAt: new Date(),
-      });
-      toast.success("Task added successfully!");
-      setTitle("");
-      setDescription("");
-      setPriority("Low");
-    } catch (error) {
-      toast.error("Error adding task: " + error.message);
-    }
-  };
+export default function TaskForm({ onSubmit }) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)} // Ensure onSubmit is passed correctly
       className="bg-white p-6 rounded-lg shadow-md mb-8"
     >
       <h2 className="text-xl font-semibold mb-4">Add New Task</h2>
-      <input
-        type="text"
-        placeholder="Task Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="w-full p-2 mb-4 border rounded"
-      />
-      <textarea
-        placeholder="Task Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        className="w-full p-2 mb-4 border rounded"
-      />
-      <select
-        value={priority}
-        onChange={(e) => setPriority(e.target.value)}
-        className="w-full p-2 mb-4 border rounded"
-      >
-        <option value="Low">Low</option>
-        <option value="Medium">Medium</option>
-        <option value="High">High</option>
-      </select>
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">Title</label>
+        <input
+          type="text"
+          {...register("title")}
+          className="w-full p-2 border rounded"
+        />
+        {errors.title && (
+          <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+        )}
+      </div>
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">Description</label>
+        <textarea
+          {...register("description")}
+          className="w-full p-2 border rounded"
+        />
+        {errors.description && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.description.message}
+          </p>
+        )}
+      </div>
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">Priority</label>
+        <select {...register("priority")} className="w-full p-2 border rounded">
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+        {errors.priority && (
+          <p className="text-red-500 text-sm mt-1">{errors.priority.message}</p>
+        )}
+      </div>
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">Deadline</label>
+        <input
+          type="date"
+          {...register("deadline")}
+          className="w-full p-2 border rounded"
+        />
+        {errors.deadline && (
+          <p className="text-red-500 text-sm mt-1">{errors.deadline.message}</p>
+        )}
+      </div>
+
       <button
         type="submit"
         className="w-full bg-blue-600 text-white p-2 rounded"
