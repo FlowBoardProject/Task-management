@@ -103,10 +103,10 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/terms"
-                  className="text-sm hover:text-white transition-colors"
+                  to="/terms-and-conditions"
+                  className="text-sm hover:text-white transition-colors" 
                 >
-                  Terms of Service
+                  Terms & Conditions
                 </Link>
               </li>
               <li>
