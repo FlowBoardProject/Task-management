@@ -40,19 +40,19 @@ export default function TaskCard({ task, setEditTask, onMoveTask }) {
         <div className="flex justify-between items-center text-gray-900 text-xs">
           {/* Assigned Members */}
           <div className="flex items-center gap-2">
-            <strong className="text-gray-900">Assigned to:</strong>
-            <div className="flex flex-wrap gap-1">
-              {Array.isArray(task.assignedTo) && task.assignedTo.length > 0 ? (
-                task.assignedTo.map((user, index) => (
-                  <span key={index} className="bg-white text-blue-900 text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow">
-                    <User size={12} /> {user}
-                  </span>
-                ))
-              ) : (
-                <span className="text-gray-600">Not assigned</span>
-              )}
-            </div>
-          </div>
+    <strong className="text-gray-900">Assigned to:</strong>
+    <div className="flex flex-wrap gap-1">
+        {task.assignedTo.length > 0 ? (
+            task.assignedTo.map((user) => (
+                <span key={user.id} className="bg-white text-blue-900 text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow">
+                    <User size={12} /> {user.name}
+                </span>
+            ))
+        ) : (
+            <span className="text-gray-600">Not assigned</span>
+        )}
+    </div>
+</div>
         </div>
 
 

@@ -2,17 +2,21 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/Button";
 import { db } from "../firebase"; 
-import { ref, get, onValue } from "firebase/database";
+import { ref, get, update, onValue } from "firebase/database";
 import { TaskHeader } from "../components/TaskHeader";
 import { TaskActions } from "../components/TaskActions";
 import { TaskInfo } from "../components/TaskInfo";
 import { DeleteConfirmationModal } from "../components/DeleteConfirmationModal";
 import { TaskComments } from "../components/TaskComments";
 import { updateTaskInFirebase } from "../services/taskService";
+import { useAuth } from "../context/AuthContext"; // ✅ Import user authentication
 
 export default function TaskDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const userRole = user?.role || "user"; // 🔥 Default to "user" if role is missing
+
     const [task, setTask] = useState(null);
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
@@ -20,52 +24,82 @@ export default function TaskDetails() {
     const [isEditing, setIsEditing] = useState(false);
     const [editedTask, setEditedTask] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-
     
-// Inside TaskDetails component
-useEffect(() => {
-    if (!id) return;
+    useEffect(() => {
+        if (!id) return;
+    
+        const fetchTask = async () => {
+            try {
+                const taskRef = ref(db, `tasks/${id}`);
+                const snapshot = await get(taskRef);
+    
+                if (snapshot.exists()) {
+                    const taskData = snapshot.val();
 
-    const fetchTask = async () => {
-        try {
-            const taskRef = ref(db, `tasks/${id}`);
-            const snapshot = await get(taskRef);
-
-            if (snapshot.exists()) {
-                const taskData = snapshot.val();
-                setTask({ id, ...taskData });
-                setEditedTask({ id, ...taskData });
-            } else {
-                console.warn("⚠️ Task not found");
-                navigate("/tasks");
+                    if (taskData.deleted) {
+                        console.warn("⚠️ Task is deleted, redirecting...");
+                        navigate("/tasks");
+                        return;
+                    }
+    
+                    // ✅ Ensure assignedTo is formatted correctly
+                    const formattedTask = {
+                        ...taskData,
+                        assignedTo: Array.isArray(taskData.assignedTo)
+                            ? taskData.assignedTo.map(user => ({
+                                id: user.id,
+                                name: user.name || "Unknown User"
+                            }))
+                            : []
+                    };
+    
+                    setTask({ id, ...formattedTask });
+                    setEditedTask({ id, ...formattedTask });
+                } else {
+                    console.warn("⚠️ Task not found");
+                    navigate("/tasks");
+                }
+            } catch (error) {
+                console.error("❌ Error fetching task:", error);
             }
-        } catch (error) {
-            console.error("❌ Error fetching task:", error);
-        }
-    };
+        };
+    
+        fetchTask();
 
-    // Fetch comments in real time
-    const commentsRef = ref(db, `tasks/${id}/comments`);
-    const unsubscribe = onValue(commentsRef, (snapshot) => {
-        if (snapshot.exists()) {
-            const commentsData = snapshot.val();
-            const commentsList = Object.values(commentsData);
-            setComments(commentsList);
-        } else {
-            setComments([]); // No comments
-        }
-    });
+        // ✅ Fetch comments in real-time
+        const commentsRef = ref(db, `tasks/${id}/comments`);
+        const unsubscribe = onValue(commentsRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const commentsData = snapshot.val();
+                const commentsList = Object.values(commentsData);
+                setComments(commentsList);
+            } else {
+                setComments([]); // No comments
+            }
+        });
 
-    fetchTask();
+        return () => unsubscribe(); // Cleanup Firebase listener
 
-    return () => unsubscribe(); // Cleanup Firebase listener
-}, [id, navigate]);
+    }, [id, navigate]);
+    
 
     const handleSaveEdit = async () => {
+        if (userRole !== "manager") {
+            console.warn("❌ Permission denied: Only managers can edit tasks.");
+            return;
+        }
+
         try {
-            await updateTaskInFirebase(editedTask.id, editedTask);
-            setTask(editedTask); // Update local state
+            const formattedTask = {
+                ...editedTask,
+                assignedTo: editedTask.assignedTo.map(user => ({
+                    id: user.id,
+                    name: user.name
+                })),
+            };
+
+            await updateTaskInFirebase(editedTask.id, formattedTask);
+            setTask(editedTask);
             setIsEditing(false);
             console.log("✅ Task updated successfully in Firebase");
         } catch (error) {
@@ -73,13 +107,40 @@ useEffect(() => {
         }
     };
 
-    const handleDeleteTask = () => {
+    const handleDeleteTask = async () => {
+        if (userRole !== "manager") {
+            console.warn("❌ Permission denied: Only managers can delete tasks.");
+            return;
+        }
         setShowDeleteModal(true);
     };
 
-    const confirmDelete = () => {
-        setShowDeleteModal(false);
-        navigate("/tasks");
+    const confirmDelete = async () => {
+        if (userRole !== "manager") {
+            console.warn("❌ Permission denied: Only managers can delete tasks.");
+            return;
+        }
+
+        try {
+            // ✅ Ensure task exists before trying to delete
+            if (!id || !task) {
+                console.error("❌ Error: Task ID or task data is missing.");
+                return;
+            }
+    
+            const softDeletedTask = {
+                ...task,
+                deleted: true, // ✅ Mark task as deleted
+                assignedTo: Array.isArray(task.assignedTo) ? task.assignedTo : [] // ✅ Ensure assignedTo is an array
+            };
+    
+            await updateTaskInFirebase(id, softDeletedTask);
+            console.log(`✅ Task ${id} marked as deleted`);
+            setShowDeleteModal(false);
+            navigate("/tasks");
+        } catch (error) {
+            console.error("❌ Error marking task as deleted:", error);
+        }
     };
 
     const cancelDelete = () => {
@@ -95,18 +156,21 @@ useEffect(() => {
             <TaskHeader title={task.title} description={task.description} />
 
             <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
-                <TaskActions 
-                    isEditing={isEditing} 
-                    onEditToggle={() => setIsEditing(!isEditing)} 
-                    onSave={handleSaveEdit} 
-                    onDelete={handleDeleteTask} 
-                />
+                
+                {/* ✅ Show actions only for Managers */}
+                {userRole === "manager" && (
+                    <TaskActions 
+                        isEditing={isEditing} 
+                        onEditToggle={() => setIsEditing(!isEditing)} 
+                        onSave={handleSaveEdit} 
+                        onDelete={handleDeleteTask} 
+                    />
+                )}
 
                 <TaskInfo 
                     isEditing={isEditing} 
                     task={editedTask} 
                     setTask={setEditedTask} 
-                    users={task.assignedTo || []} 
                 />
 
                 <TaskComments 

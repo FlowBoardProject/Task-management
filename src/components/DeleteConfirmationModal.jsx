@@ -2,7 +2,7 @@ import { Button } from "../components/ui/Button";
 
 export function DeleteConfirmationModal({ onConfirm, onCancel }) {
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-md bg-opacity-50 flex items-center justify-center">
             <div className="bg-white p-6 rounded-lg shadow-xl text-center w-96">
                 <h2 className="text-lg font-semibold text-gray-900">Are you sure?</h2>
                 <p className="text-gray-600 mt-2">This action cannot be undone.</p>

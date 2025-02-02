@@ -11,36 +11,41 @@ const TASKS_PATH = "tasks";
 export const addTaskToFirebase = async (task) => {
     try {
         const tasksRef = ref(db, TASKS_PATH);
-        console.log("📌 Sending to Firebase:", task); 
-        const newTaskRef = await push(tasksRef, task);
+        const newTaskRef = await push(tasksRef, {
+            ...task,
+            assignedTo: task.assignedTo.map((user) => ({ id: user.id, name: user.name })), // ✅ Store assigned users properly
+        });
         return newTaskRef.key;
     } catch (error) {
-        console.error("❌ Error adding task to Firebase:", error);
+        console.error("❌ Error adding task:", error);
         throw error;
     }
 };
 
+
 /**
- * Fetch all tasks from Firebase.
+ * Fetch all tasks from Firebase, excluding deleted tasks.
  * @returns {Promise<Array>} - List of tasks.
  */
 export const getTasksFromFirebase = async () => {
     try {
-        const dbRef = ref(db);
-        const snapshot = await get(child(dbRef, TASKS_PATH));
-
+        const snapshot = await get(ref(db, "tasks"));
         if (!snapshot.exists()) return [];
 
         const tasksData = snapshot.val();
-        return Object.entries(tasksData).map(([id, task]) => ({
-            id,
-            ...task,
-        }));
+        return Object.entries(tasksData)
+            .map(([id, task]) => ({
+                id,
+                ...task,
+                assignedTo: task.assignedTo || [],
+            }))
+            .filter(task => !task.deleted); // ✅ Exclude deleted tasks
     } catch (error) {
-        console.error("❌ Error fetching tasks from Firebase:", error);
+        console.error("❌ Error fetching tasks:", error);
         throw error;
     }
 };
+
 
 /**
  * Update the status of a task in Firebase.
@@ -65,14 +70,32 @@ export const updateTaskStatusInFirebase = async (taskId, newStatus) => {
 
 export const updateTaskInFirebase = async (taskId, updatedTask) => {
     try {
+        // ✅ Ensure assignedTo stores { id, name }
+        const cleanedAssignedTo = updatedTask.assignedTo.map(user => ({
+            id: user.id,
+            name: user.name ? user.name : "Unknown User" // 🔥 Fix undefined names
+        }));
+
+        const cleanedTask = {
+            ...updatedTask,
+            assignedTo: cleanedAssignedTo,
+        };
+
+        console.log("✅ Updating Firebase with:", cleanedTask);
+
         const taskRef = ref(db, `tasks/${taskId}`);
-        await update(taskRef, updatedTask);
+        await update(taskRef, cleanedTask);
         console.log(`✅ Task ${taskId} updated successfully in Firebase`);
     } catch (error) {
         console.error("❌ Error updating task in Firebase:", error);
         throw error;
     }
 };
+
+
+
+
+
 
 /**
  * Add a comment to a specific task in Firebase.
