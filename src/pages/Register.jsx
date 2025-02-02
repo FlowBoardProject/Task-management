@@ -98,6 +98,7 @@ export default function Register() {
 
       // Use Axios to store the data in the Realtime Database
       await axios.put(dbUrl, userData);
+       localStorage.setItem("user", JSON.stringify(userData));
 
       // Show success message and prompt the user to verify their email
       Swal.fire({
