@@ -27,8 +27,8 @@ export default function TaskCard({ task, onMoveTask }) {  // ✅ Removed "setEdi
                     <span
                         className={`text-xs font-medium px-3 py-1 rounded-full uppercase tracking-wide 
                             ${task.priority === "High" ? "bg-red-300 text-red-900" :
-                            task.priority === "Medium" ? "bg-yellow-300 text-yellow-900" :
-                            "bg-green-300 text-green-900"}`}
+                                task.priority === "Medium" ? "bg-yellow-300 text-yellow-900" :
+                                    "bg-green-300 text-green-900"}`}
                     >
                         {task.priority}
                     </span>

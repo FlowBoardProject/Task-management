@@ -1,20 +1,25 @@
 import { useEffect, useState } from "react";
-import { ref, update, get } from "firebase/database"; // ✅ Firebase functions
-import { db } from "../../firebase"; // ✅ Firebase instance
+import { ref, update, get } from "firebase/database";
+import { db } from "../../firebase";
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { X, ChevronDown, User } from "lucide-react";
-import { getUsersByDepartment } from "../../services/userService"; // ✅ Fetch department users
+import { getUsersByDepartment } from "../../services/userService";
 
 export default function EditTaskModal({ task, onSave, onClose }) {
+
+    //  -------------------- State --------------------
     const [updatedTask, setUpdatedTask] = useState({
         ...task,
         assignedTo: Array.isArray(task.assignedTo) ? task.assignedTo : [],
     });
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [availableUsers, setAvailableUsers] = useState([]); // ✅ Store users from the department
+    const [availableUsers, setAvailableUsers] = useState([]);
+    //  -------------------- State --------------------
 
-    // ✅ Fetch users assigned to the same department as the task
+
+
+    //  -------------------- Fetch users --------------
     useEffect(() => {
         if (task.departments) {
             console.log("🔍 Fetching users for department:", task.departments);
@@ -26,15 +31,22 @@ export default function EditTaskModal({ task, onSave, onClose }) {
                 .catch((err) => console.error("❌ Failed to fetch users:", err));
         }
     }, [task]);
+    //  -------------------- Fetch users --------------
 
-    // ✅ Ensure assignedTo is properly structured
+
+
+    //  -------------- Syncs updatedTask  --------------
     useEffect(() => {
         setUpdatedTask({
             ...task,
             assignedTo: Array.isArray(task.assignedTo) ? task.assignedTo : [],
         });
     }, [task]);
+    //  -------------- Syncs updatedTask  --------------
 
+
+        
+    //  ------------- Submit Task Editing  -------------
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -51,8 +63,11 @@ export default function EditTaskModal({ task, onSave, onClose }) {
             console.error("❌ Error updating task:", error);
         }
     };
+    //  ------------- Submit Task Editing  -------------
 
-    // ✅ Toggle user selection
+
+
+    //  ------------- Assign/Remove Users  -------------
     const toggleUserSelection = (selectedUser) => {
         setUpdatedTask((prevTask) => {
             const isUserSelected = prevTask.assignedTo.some((user) => user.id === selectedUser.id);
@@ -64,6 +79,8 @@ export default function EditTaskModal({ task, onSave, onClose }) {
             return { ...prevTask, assignedTo: updatedAssignedTo };
         });
     };
+    //  ------------- Assign/Remove Users  -------------
+
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900/40 backdrop-blur-md z-50">

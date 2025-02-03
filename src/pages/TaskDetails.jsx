@@ -12,10 +12,12 @@ import { updateTaskInFirebase } from "../services/taskService";
 import { useAuth } from "../context/AuthContext"; // ✅ Import user authentication
 
 export default function TaskDetails() {
+
+    //  -------------------- State --------------
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
-    const userRole = user?.role || "user"; // 🔥 Default to "user" if role is missing
+    const userRole = user?.role || "user"; // "user" if role is missing
 
     const [task, setTask] = useState(null);
     const [comments, setComments] = useState([]);
@@ -24,7 +26,10 @@ export default function TaskDetails() {
     const [isEditing, setIsEditing] = useState(false);
     const [editedTask, setEditedTask] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    
+    //  -------------------- State --------------
+
+
+    //  --------------- Fetch Tasks --------------
     useEffect(() => {
         if (!id) return;
     
@@ -81,7 +86,8 @@ export default function TaskDetails() {
         return () => unsubscribe(); // Cleanup Firebase listener
 
     }, [id, navigate]);
-    
+    //  --------------- Fetch Tasks --------------
+
 
     const handleSaveEdit = async () => {
         if (userRole !== "manager") {

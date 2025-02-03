@@ -7,50 +7,56 @@ import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 
 export function TaskComments({ taskId, comments, newComment, setNewComment, setComments }) {
-  const [error, setError] = useState("");
-  const { user } = useAuth(); // Use "user" from your AuthContext
 
-  // Compute the user's display name similar to your Navbar
-  const userName = user 
-    ? (user.displayName || `${user.firstName || ""} ${user.lastName || ""}`.trim()) 
+  //  -------------------- State --------------
+  const [error, setError] = useState("");
+  const { user } = useAuth();
+  //  -------------------- State --------------
+
+
+  //  ------------------- Checks --------------
+  const userName = user
+    ? (user.displayName || `${user.firstName || ""} ${user.lastName || ""}`.trim())
     : "Anonymous";
 
-    const handleAddComment = async () => {
-      if (!newComment.trim()) {
-          setError("Comment cannot be empty.");
-          return;
-      }
-  
-      if (!taskId) {
-          setError("Task ID is missing.");
-          return;
-      }
-  
-      console.log("✅ Adding comment to Task ID:", taskId);
-  
-      const commentData = {
-          name: userName || "Anonymous",
-          text: newComment,
-          date: new Date().toLocaleString(),
-      };
-  
-      try {
-          const commentsRef = ref(db, `tasks/${taskId}/comments`);
-          await push(commentsRef, commentData);
-  
-          // ✅ Remove `setComments([...comments, commentData]);` 
-          // Because the real-time listener in `TaskDetails.jsx` will update comments automatically
-  
-          setNewComment(""); // Reset input field
-          setError("");
-  
-          console.log(`✅ Comment added to task ${taskId}`);
-      } catch (error) {
-          console.error("❌ Error adding comment to Firebase:", error);
-          setError("Failed to add comment.");
-      }
-  };
+  const handleAddComment = async () => {
+    if (!newComment.trim()) {
+      setError("Comment cannot be empty.");
+      return;
+    }
 
+    if (!taskId) {
+      setError("Task ID is missing.");
+      return;
+    }
+
+    console.log("✅ Adding comment to Task ID:", taskId);
+
+    const commentData = {
+      name: userName || "Anonymous",
+      text: newComment,
+      date: new Date().toLocaleString(),
+    };
+  //  ------------------- Checks --------------
+
+
+    //  ----------- Create Comments -----------
+    try {
+      const commentsRef = ref(db, `tasks/${taskId}/comments`);
+      await push(commentsRef, commentData);
+
+      setNewComment(""); // Reset input field
+      setError("");
+
+      console.log(`✅ Comment added to task ${taskId}`);
+    } catch (error) {
+      console.error("❌ Error adding comment to Firebase:", error);
+      setError("Failed to add comment.");
+    }
+  };
+    //  ----------- Create Comments -----------
+
+    
   return (
     <div className="mt-6">
       <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">

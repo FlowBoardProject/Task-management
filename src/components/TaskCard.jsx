@@ -40,19 +40,19 @@ export default function TaskCard({ task, setEditTask, onMoveTask }) {
         <div className="flex justify-between items-center text-gray-900 text-xs">
           {/* Assigned Members */}
           <div className="flex items-center gap-2">
-    <strong className="text-gray-900">Assigned to:</strong>
-    <div className="flex flex-wrap gap-1">
-        {task.assignedTo.length > 0 ? (
-            task.assignedTo.map((user) => (
-                <span key={user.id} className="bg-white text-blue-900 text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow">
+            <strong className="text-gray-900">Assigned to:</strong>
+            <div className="flex flex-wrap gap-1">
+              {task.assignedTo.length > 0 ? (
+                task.assignedTo.map((user) => (
+                  <span key={user.id} className="bg-white text-blue-900 text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow">
                     <User size={12} /> {user.name}
-                </span>
-            ))
-        ) : (
-            <span className="text-gray-600">Not assigned</span>
-        )}
-    </div>
-</div>
+                  </span>
+                ))
+              ) : (
+                <span className="text-gray-600">Not assigned</span>
+              )}
+            </div>
+          </div>
         </div>
 
 
@@ -73,14 +73,14 @@ export default function TaskCard({ task, setEditTask, onMoveTask }) {
           </div>
 
           <button
-              onClick={() => onMoveTask(task.id, 1)}
-              disabled={task.status === "done"}
-              className={`flex items-center justify-center p-2 rounded-full border-2 transition-all 
+            onClick={() => onMoveTask(task.id, 1)}
+            disabled={task.status === "done"}
+            className={`flex items-center justify-center p-2 rounded-full border-2 transition-all 
                         ${task.status === "done" ? "border-gray-400 text-gray-400 cursor-not-allowed opacity-50"
-                  : "border-purple-500 text-purple-500 hover:bg-purple-400 hover:text-white hover:scale-110"}`}
-            >
-              <ArrowRightCircle size={20} />
-            </button>
+                : "border-purple-500 text-purple-500 hover:bg-purple-400 hover:text-white hover:scale-110"}`}
+          >
+            <ArrowRightCircle size={20} />
+          </button>
         </div>
 
         {/* 🔎 View Details Button */}
@@ -101,13 +101,13 @@ export default function TaskCard({ task, setEditTask, onMoveTask }) {
 
 
       </CardContent>
-          {/* Floating Edit Button */}
-          <button
-  onClick={() => setEditTask(task)}
-  className="absolute top-[-10px] right-[-10px] z-20 bg-gradient-to-r from-yellow-200 to-yellow-600 p-2 rounded-full shadow-lg transition-transform duration-300 hover:scale-110"
->
-  <Edit size={18} className="text-white" />
-</button>
+      {/* Floating Edit Button */}
+      <button
+        onClick={() => setEditTask(task)}
+        className="absolute top-[-10px] right-[-10px] z-20 bg-gradient-to-r from-yellow-200 to-yellow-600 p-2 rounded-full shadow-lg transition-transform duration-300 hover:scale-110"
+      >
+        <Edit size={18} className="text-white" />
+      </button>
 
     </Card>
 

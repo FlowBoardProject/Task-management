@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 
 export default function TaskFilters({
+    
+    //  ------------------- Props --------------
     filterCategory,
     setFilterCategory,
     filterPriority,
@@ -16,7 +18,9 @@ export default function TaskFilters({
     setSortOrder,
     viewMode,
     setViewMode,
-}) {
+    //  ------------------- Props --------------
+}) 
+{
     return (
         <div className="max-w-6xl mx-auto bg-gradient-to-br from-white to-blue-50 p-6 rounded-2xl shadow-xl border border-gray-200 transition-all hover:shadow-2xl flex flex-col md:flex-row gap-4 justify-between items-center mb-8">
             {/* Filter by Category & Priority */}

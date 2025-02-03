@@ -5,18 +5,26 @@ import { useAuth } from "../context/AuthContext";
 import { getUsersByDepartment } from "../services/userService";
 
 export function TaskInfo({ isEditing, task, setTask }) {
+
+    //  -------------------- State --------------
     const { user } = useAuth();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [departmentUsers, setDepartmentUsers] = useState([]);
+    //  -------------------- State --------------
 
-    // ✅ Ensure task.assignedTo is always an array
+    
+    
+    //  --------- Initialize assignedTo ----------
     useEffect(() => {
         if (!task.assignedTo || !Array.isArray(task.assignedTo)) {
             setTask(prev => ({ ...prev, assignedTo: [] }));
         }
     }, [task, setTask]);
+    //  --------- Initialize assignedTo ----------
 
-    // ✅ Fetch users from the same department
+
+
+    //  -------------------- Fetch Users --------------
     useEffect(() => {
         if (user?.departments) {
             getUsersByDepartment(user.departments)
@@ -24,8 +32,11 @@ export function TaskInfo({ isEditing, task, setTask }) {
                 .catch(() => console.error("❌ Failed to load department users."));
         }
     }, [user]);
+    //  -------------------- Fetch Users --------------
 
-    // ✅ Toggle user selection (assign/unassign)
+
+
+    //  ----------- Assign or Unassign User ------------
     const toggleUserSelection = (selectedUser) => {
         if (!selectedUser.id || !selectedUser.fullName) {
             console.error("❌ Invalid user data", selectedUser);
@@ -42,7 +53,8 @@ export function TaskInfo({ isEditing, task, setTask }) {
             return { ...prevTask, assignedTo: updatedAssignedTo };
         });
     };
-    
+    //  ----------- Assign or Unassign User ------------
+
 
     return (
         <div className="space-y-3">

@@ -8,6 +8,9 @@ import { getUsersByDepartment } from "../services/userService";
 import { Calendar, User, Flag, Rocket, ChevronDown } from "lucide-react";
 
 export default function CreateTaskForm({ onAddTask }) {
+
+        
+    //  -------------------- State --------------
     const [newTask, setNewTask] = useState({
         title: "",
         description: "",
@@ -21,8 +24,11 @@ export default function CreateTaskForm({ onAddTask }) {
     const [error, setError] = useState("");
     const { user } = useAuth(); 
     const [filteredUsers, setFilteredUsers] = useState([]);
+    //  -------------------- State --------------
 
-    // ✅ Fetch users based on the current user's department
+
+
+    //  -------------------- Fetch users --------------
     useEffect(() => {
         if (user?.departments) {
             console.log("🔍 Fetching users for department:", user.departments);
@@ -31,8 +37,11 @@ export default function CreateTaskForm({ onAddTask }) {
                 .catch(() => setError("❌ Failed to load department users."));
         }
     }, [user]);
+    //  -------------------- Fetch users --------------
 
-    // ✅ Handle form submission
+
+
+    //  ------------- Submit Task Creating  -------------
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -72,8 +81,11 @@ export default function CreateTaskForm({ onAddTask }) {
             setLoading(false);
         }
     };
+    //  ------------- Submit Task Creating  -------------
 
-    // ✅ Toggle user selection
+
+
+    //  ------------- Assign/Remove Users  -------------
     const toggleUserSelection = (selectedUser) => {
         setNewTask((prevTask) => {
             const isUserSelected = prevTask.assignedTo.some((user) => user.id === selectedUser.id);
@@ -85,7 +97,9 @@ export default function CreateTaskForm({ onAddTask }) {
             return { ...prevTask, assignedTo: updatedAssignedTo };
         });
     };
+    //  ------------- Assign/Remove Users  -------------
 
+    
     return (
         <div className="max-w-2xl mx-auto mb-8 p-8 bg-gradient-to-br from-white to-blue-50 rounded-3xl shadow-2xl border">
             {/* Title Section */}

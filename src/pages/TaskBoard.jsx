@@ -7,7 +7,7 @@ import TaskColumn from "../components/TaskColumn";
 import TaskFilters from "../components/TaskFilters";
 import TaskCard from "../components/TaskCard";
 import moveTask from "../utils/MoveTask";
-import { PlusCircle, X } from "lucide-react"; // ✅ Import icons
+import { PlusCircle, X } from "lucide-react";
 
 const statusConfig = {
     todo: { label: "To Do", color: "from-blue-50 to-blue-100" },
@@ -16,6 +16,8 @@ const statusConfig = {
 };
 
 export default function TaskBoard() {
+
+    //  -------------------- State --------------
     const { user } = useAuth();
     const [tasks, setTasks] = useState([]);
     const [editTask, setEditTask] = useState(null);
@@ -27,8 +29,10 @@ export default function TaskBoard() {
     const [filterCategory, setFilterCategory] = useState("all");
     const [filterPriority, setFilterPriority] = useState("all");
     const [sortOrder, setSortOrder] = useState("asc");
+    //  -------------------- State --------------
 
-    // ✅ Fetch tasks from Firebase
+
+    //  --------------- Fetch Tasks -------------
     useEffect(() => {
         if (user && user.departments) {
             fetchUserTasks();
@@ -51,7 +55,10 @@ export default function TaskBoard() {
             console.error("❌ Error loading tasks:", error);
         }
     };
+    //  --------------- Fetch Tasks -------------
 
+
+    //  --------------- Moving Tasks -------------
     const handleMoveTask = (taskId, direction) => {
         setTasks((prevTasks) =>
             prevTasks.map((task) => {
@@ -75,18 +82,28 @@ export default function TaskBoard() {
             })
         );
     };
+    //  --------------- Moving Tasks -------------
 
+
+    //  --------------- Handle Delete -------------
     const handleDeleteTask = (taskId) => {
         setTasks((prevTasks) => prevTasks.filter(task => task.id !== taskId));
         showNotification("Task deleted!");
     };
+    //  --------------- Handle Delete -------------
 
+
+
+    //  --------------- Notification  -------------
     const showNotification = (message) => {
         setNotification(message);
         setTimeout(() => setNotification(""), 2000);
     };
+    //  --------------- Notification  -------------
 
-    // ✅ Filter & Sort Logic
+
+
+    //  ----------------- Filters -----------------
     const filteredTasks = tasks
         .filter(task => filterCategory === "all" || task.status === filterCategory)
         .filter(task => filterPriority === "all" || task.priority === filterPriority)
@@ -94,6 +111,7 @@ export default function TaskBoard() {
             new Date(a.deadline) - new Date(b.deadline) :
             new Date(b.deadline) - new Date(a.deadline)
         );
+    //  ----------------- Filters -----------------
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
