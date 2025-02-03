@@ -16,7 +16,7 @@ const schema = yup.object().shape({
   lastName: yup.string().required("Last name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
   role: yup.string().required("Role is required"),
-  department: yup.string().required("Department is required"), // Add department field
+  departments: yup.string().required("Department is required"), // Add department field
 });
 
 export default function Profile() {
@@ -45,7 +45,7 @@ export default function Profile() {
             lastName: userData.lastName,
             email: userData.email,
             role: userData.role,
-            department: userData.departments, // Include department
+            departments: userData.departments, // Include department
           });
           console.log(userData.departments);
         }
@@ -64,7 +64,7 @@ export default function Profile() {
         lastName: data.lastName,
         email: data.email,
         role: data.role,
-        department: data.department, // Include department
+        departments: data.departments, // Include department
       });
 
       setIsEditing(false);
@@ -195,28 +195,29 @@ export default function Profile() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Department
+                      Departments
                     </label>
                     <select
-                      {...register("department")}
+                      {...register("departments")}
                       disabled={!isEditing}
                       className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors"
                     >
-                      <option value="">Select Department</option>
-                      <option value="Front-End department">
-                        Front-End department
-                      </option>
-                      <option value="Back-End department">
-                        Back-End department
-                      </option>
-                      <option value="DataBase department">
-                        DataBase department
-                      </option>
+                      <option value="">Select a department</option>
+                  <option value="IT">IT</option>
+                  <option value="Front-End department">
+                    Front-End department
+                  </option>
+                  <option value="Back-End department">
+                    Back-End department
+                  </option>
+                  <option value="DataBase department">
+                    DataBase department
+                  </option>
                       {/* Add more departments as needed */}
                     </select>
-                    {errors.department && (
+                    {errors.departments && (
                       <p className="mt-1 text-sm text-red-600">
-                        {errors.department.message}
+                        {errors.departments.message}
                       </p>
                     )}
                   </div>

@@ -2,15 +2,10 @@
 
 Welcome to Task Manager! This project provides a seamless and intuitive platform for managing tasks efficiently with a modern design and user-friendly experience  
 
-## 👨‍💻 About the Team  
-
 ---
 
-- **Ahmad alnajjar**: Scrum Master  
-- **abdullah alghawanmeh**: Product Owner  
-- **mohammaed abu dayyeh**: Developer  
-- **Hasan Mansour**: Developer  
-- **mohammed alsarrawi**: QA Specialist  
+## 👨‍💻 About Me  
+I'm Hasan Mansour, a passionate MERN-Stack Developer & Java Developer.
 
 ---
 
@@ -23,37 +18,46 @@ Welcome to Task Manager! This project provides a seamless and intuitive platform
 6. **Login**  
 7. **About**  
 8. **Contact** 
-9. **Tearms&condition**
-10. **profile page**
+9. **Tearms & Condition**
+10. **Profile page**
  
 
 ---
 
-## ✨ Features  
-- **📱 Responsive Design**: Fully optimized for various devices and screen sizes.  
-- **🎨 Modern UI**: Built with a clean and visually appealing design using Bootstrap and Tailwind CSS.  
-- **🔥 Firebase Integration**: Used for authentication and backend services.  
-- **🛒 E-Commerce Functionality**: Includes shopping cart, wishlist, and checkout pages.  
-- **👤 User Profiles**: Personal user dashboards for account management.  
+## ✨ Features
+
+- **🔥 Firebase Integration**: Integrated Firebase for authentication and database management.
+- **📩 Email Verification**: Users receive a verification email upon registration, ensuring only verified users can access protected areas.
+- **🔐 Authentication & Roles**: Secure user authentication with Firebase, including role-based access control (Admin, User, etc.).
+- **🎨 Modern UI with React & Tailwind CSS**: Styled with Tailwind CSS for a modern and responsive design, including dark mode support and theme customization.
 
 ---
 
 ## 🛠️ Technologies Used  
-- **HTML5** and **CSS3** for the front-end.  
-- **React** for interactivity and functionality.  
-- **Bootstrap** and **Tailwind CSS** for responsive and modern design.  
-- **Firebase** for authentication and backend services.  
+- **Firebase** (Auth, Firestore, Storage)
+- **React.js** (Frontend framework)
+- **Tailwind CSS** (Styling framework)
+- **React Router** (Navigation)
 
 ---
 
-## 🎨 Figma Wireframe and Mockup  
-Explore the wireframes and mockups for the project design on Figma:  
-👉 [Access the Figma Wireframe & Mockup]([https://www.figma.com/design/your-figma-link](https://www.figma.com/design/jX3awGU7bE8rglbuGRpqkq/Tasks-Project?node-id=60-264&t=PzvMzofweIjHv9r1-0))  
+## 🖼️ Project Preview  
+Below are some screenshots from the project:
 
----
+### 📸 Preview 1  
+![Preview 1](https://drive.google.com/uc?export=view&id=16LQqvUWxdo6HKs-_hf-N4aaNBj5QrYvE)
 
-## 📋 Trello Board  
-Track project progress and tasks on Trello:  
-👉 [Trello Board]([https://trello.com/b/yRNoKGDm/project-js](https://trello.com/b/2tyfbvnL/reactproject))
+### 📸 Preview 2  
+![Preview 2](https://drive.google.com/uc?export=view&id=1MSJktw9EbXQuvA9NPPenfa3cq6HGzbUU)
 
+### 📸 Preview 3  
+![Preview 3](https://drive.google.com/uc?export=view&id=1pATAUTUxVBSvsXDfdbadrsj8PlPFd6i4)
 
+### 📸 Preview 4  
+![Preview 4](https://drive.google.com/uc?export=view&id=1bZWtQwQMq57Xe5X7TG2QpfaBvoFoI7Fk)
+
+### 📸 Preview 5  
+![Preview 5](https://drive.google.com/uc?export=view&id=1pj3ndTmpnd_0oq5HH5bTOdpkZ9DurQSz)
+
+### 📸 Preview 6  
+![Preview 6](https://drive.google.com/uc?export=view&id=1pj3ndTmpnd_0oq5HH5bTOdpkZ9DurQSz)
