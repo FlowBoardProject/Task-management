@@ -57,7 +57,7 @@ Below are some screenshots from the project:
 ![Preview 4](https://drive.google.com/uc?export=view&id=1bZWtQwQMq57Xe5X7TG2QpfaBvoFoI7Fk)
 
 ### 📸 Preview 5  
-![Preview 5](https://drive.google.com/uc?export=view&id=1pj3ndTmpnd_0oq5HH5bTOdpkZ9DurQSz)
+![Preview 5](https://drive.google.com/uc?export=view&id=1sLLqSeI2aKUrDmR9NFiCKmY3mKkznTSb)
 
 ### 📸 Preview 6  
 ![Preview 6](https://drive.google.com/uc?export=view&id=1pj3ndTmpnd_0oq5HH5bTOdpkZ9DurQSz)
