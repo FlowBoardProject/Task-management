@@ -4,18 +4,16 @@ import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
-import { Search, Menu, X, Bell, User } from "lucide-react";
+import { Search, Menu, X, Bell, User, LayoutDashboard } from "lucide-react"; // ✅ Added Dashboard Icon
 
 export default function Navbar() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [notificationPermission, setNotificationPermission] =
-    useState("default");
+  const [notificationPermission, setNotificationPermission] = useState("default");
 
   useEffect(() => {
-    // Check if the browser supports notifications
     if ("Notification" in window) {
       setNotificationPermission(Notification.permission);
     }
@@ -33,17 +31,6 @@ export default function Navbar() {
       });
     } else {
       toast.error("This browser does not support notifications.");
-    }
-  };
-
-  const showNotification = () => {
-    if (notificationPermission === "granted") {
-      new Notification("Task Manager", {
-        body: "You have a new task assigned!",
-        icon: "/path/to/icon.png", // Replace with your icon path
-      });
-    } else {
-      toast.warn("Please enable notifications to see alerts.");
     }
   };
 
@@ -75,7 +62,7 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
             <div className="flex space-x-6">
-              {["About", "Contact", "Articles"].map((item) => (
+              {["Home", "Articles","About", "Contact"].map((item) => (
                 <Link
                   key={item}
                   to={`/${item.toLowerCase()}`}
@@ -90,11 +77,10 @@ export default function Navbar() {
 
           {/* Right Section */}
           <div className="flex items-center space-x-6">
-         
-
-            {/* User Section */}
+            {/* User Section (Show Dashboard if Logged In) */}
             {user ? (
               <div className="flex items-center space-x-4">
+                {/* Notifications */}
                 <button
                   onClick={requestNotificationPermission}
                   className="p-2 rounded-full hover:bg-gray-100 transition-colors relative"
@@ -103,11 +89,20 @@ export default function Navbar() {
                   <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
                 </button>
 
+                {/* Dashboard Button (Only if logged in) */}
+                <Link
+                  to="/dashboard"
+                  className="hidden lg:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all"
+                >
+                  <LayoutDashboard className="h-5 w-5" />
+                  Dashboard
+                </Link>
+
+                {/* User Profile & Logout */}
                 <div className="flex items-center space-x-3">
                   <div className="hidden lg:block">
                     <p className="text-sm font-medium text-gray-700">
-                      Welcome&nbsp;
-                      {user.displayName || user.firstName}
+                      Welcome&nbsp;{user.displayName || user.firstName}
                     </p>
                   </div>
 
@@ -172,14 +167,16 @@ export default function Navbar() {
                   {item}
                 </Link>
               ))}
-            </div>
-            <div className="relative px-4">
-              <input
-                type="text"
-                placeholder="Search tasks..."
-                className="w-full py-2 pl-10 pr-4 text-sm text-gray-700 bg-gray-50 rounded-full border-none focus:ring-2 focus:ring-blue-500"
-              />
-              <Search className="absolute left-7 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              {/* Show Dashboard in Mobile Menu (Only for Logged In Users) */}
+              {user && (
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-800 hover:bg-gray-50 rounded-lg transition-all"
+                >
+                  <LayoutDashboard className="h-5 w-5" />
+                  Dashboard
+                </Link>
+              )}
             </div>
           </div>
         )}
