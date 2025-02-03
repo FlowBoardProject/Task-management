@@ -1,30 +1,31 @@
-# 🛍️ Presentia Store  
+# 🛍️ Task manager  
 
-Welcome to **Presentia Store**! This project showcases an e-commerce platform featuring a modern design and seamless user experience.  
+Welcome to Task Manager! This project provides a seamless and intuitive platform for managing tasks efficiently with a modern design and user-friendly experience  
 
 ## 👨‍💻 About the Team  
 
 ---
 
-- **Hasan Mansour**: Scrum Master  
-- **Ahmad Tarawnah**: Product Owner  
-- **Ghofran Hijazi**: Developer  
-- **Rami Abdelhamid**: Developer  
-- **Belal Kahaleh**: QA Specialist  
+- **Ahmad alnajjar**: Scrum Master  
+- **abdullah alghawanmeh**: Product Owner  
+- **mohammaed abu dayyeh**: Developer  
+- **Hasan Mansour**: Developer  
+- **mohammed alsarrawi**: QA Specialist  
 
 ---
 
 ## 📄 Pages  
 1. **Home Page**  
-2. **Shop**  
-3. **Product Details**  
-4. **User Profile**  
+2. **Dashboard**  
+3. **Task Details**  
+4. **Task List**  
 5. **Register**  
 6. **Login**  
 7. **About**  
-8. **Contact**  
-9. **Wishlist**  
-10. **Checkout**  
+8. **Contact** 
+9. **Tearms&condition**
+10. **profile page**
+ 
 
 ---
 
@@ -39,7 +40,7 @@ Welcome to **Presentia Store**! This project showcases an e-commerce platform fe
 
 ## 🛠️ Technologies Used  
 - **HTML5** and **CSS3** for the front-end.  
-- **JavaScript** for interactivity and functionality.  
+- **React** for interactivity and functionality.  
 - **Bootstrap** and **Tailwind CSS** for responsive and modern design.  
 - **Firebase** for authentication and backend services.  
 
@@ -47,30 +48,12 @@ Welcome to **Presentia Store**! This project showcases an e-commerce platform fe
 
 ## 🎨 Figma Wireframe and Mockup  
 Explore the wireframes and mockups for the project design on Figma:  
-👉 [Access the Figma Wireframe & Mockup](https://www.figma.com/design/your-figma-link)  
+👉 [Access the Figma Wireframe & Mockup]([https://www.figma.com/design/your-figma-link](https://www.figma.com/design/jX3awGU7bE8rglbuGRpqkq/Tasks-Project?node-id=60-264&t=PzvMzofweIjHv9r1-0))  
 
 ---
 
 ## 📋 Trello Board  
 Track project progress and tasks on Trello:  
-👉 [Trello Board](https://trello.com/b/yRNoKGDm/project-js)
+👉 [Trello Board]([https://trello.com/b/yRNoKGDm/project-js](https://trello.com/b/2tyfbvnL/reactproject))
 
----
 
-## 🖼️ Project Preview  
-Below are some screenshots from the portfolio project:
-
-### 📸 Preview 1  
-![Preview 1](https://drive.google.com/uc?export=view&id=1Y9KN98LUH4YPxtr5QLcd2phzBvbP-7yb)
-
-### 📸 Preview 2  
-![Preview 2](https://drive.google.com/uc?export=view&id=1-8u3pStG-W5-bwCU1jvcbF1bACBnbA0F)
-
-### 📸 Preview 3  
-![Preview 3](https://drive.google.com/uc?export=view&id=1o0l09UHPEC1ugInHv9FL2tFUnX881ZrW)
-
-### 📸 Preview 4  
-![Preview 4](https://drive.google.com/uc?export=view&id=1Ha1hddznr7U6ctgaYoxPVLrHHb3fHg_-)
-
-### 📸 Preview 5  
-![Preview 5](https://drive.google.com/uc?export=view&id=1DcCwqMof-NO8KQG2O7rxbPw5xG2E-2W-)
