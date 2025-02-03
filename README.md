@@ -61,3 +61,7 @@ Below are some screenshots from the project:
 
 ### 📸 Preview 6  
 ![Preview 6](https://drive.google.com/uc?export=view&id=1pj3ndTmpnd_0oq5HH5bTOdpkZ9DurQSz)
+
+### 📸 Preview 7  
+![Preview 7](https://drive.google.com/uc?export=view&id=1PrkkUW5xGWU7rLtYMFMr1RmQuJhVbhjk)
+
