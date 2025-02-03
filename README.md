@@ -1,116 +1,76 @@
-# 🚀 Task Management Web Application
+# 🛍️ Presentia Store  
 
-## 📌 Project Overview  
-This project is a **Task Management Web Application** developed as part of the **"XYZ" Company** initiative to improve workplace efficiency. The application helps employees **organize, track, and collaborate on daily tasks** effectively.  
+Welcome to **Presentia Store**! This project showcases an e-commerce platform featuring a modern design and seamless user experience.  
 
-## 🏗️ Tech Stack  
-- **Frontend:** React (Vite) + Tailwind CSS  
-- **Database & Authentication:** Firebase  
-- **API Requests:** Axios  
-- **Hosting:** Firebase Hosting  
+## 👨‍💻 About the Team  
 
 ---
 
-## 🎯 Features  
-
-### 🏠 Homepage  
-✅ **Welcome Message:** Encourages users to manage tasks efficiently.  
-✅ **Overview of Features:** Key functionalities like task creation, assignment, deadlines, and status updates.  
-✅ **Search Bar:** Search tasks by **keyword, category, priority, or team members**.  
-✅ **Task Categories:** Organizes tasks into **Pending, In Progress, Completed, and Urgent**.  
-✅ **Sections:**  
-   - 📌 **Recent Tasks** – Newly added tasks.  
-   - 🚨 **High-Priority Tasks** – Urgent tasks.  
-   - ✅ **Completed Tasks** – Summary of finished tasks.  
-   - ⏳ **Upcoming Deadlines** – Tasks nearing due dates.  
+- **Hasan Mansour**: Scrum Master  
+- **Ahmad Tarawnah**: Product Owner  
+- **Ghofran Hijazi**: Developer  
+- **Rami Abdelhamid**: Developer  
+- **Belal Kahaleh**: QA Specialist  
 
 ---
 
-## 🔐 Authentication & User Management  
-✅ **User Registration:**  
-   - Fields: First name, last name, email, password, and role (**Manager/Team Member**).  
-   - Validations for all fields.  
-   - Redirects to Homepage after successful registration.  
-
-✅ **User Login:**  
-   - Fields: Email & Password.  
-   - Displays a **welcome message with the user’s name** after login.  
-
-✅ **Google Authentication:**  
-   - Users can **register and log in** using Google.  
-
-✅ **User Profile Page:**  
-   - Displays **user details (name, email, role, assigned tasks)**.  
-   - Users can **edit profile information**.  
+## 📄 Pages  
+1. **Home Page**  
+2. **Shop**  
+3. **Product Details**  
+4. **User Profile**  
+5. **Register**  
+6. **Login**  
+7. **About**  
+8. **Contact**  
+9. **Wishlist**  
+10. **Checkout**  
 
 ---
 
-## 📋 Task Management  
-
-✅ **Task Dashboard:**  
-   - Users can **add tasks**.  
-   - Displays tasks in **Grid/List View** with details: **title, deadline, priority, and assigned users**.  
-
-✅ **Task Filters & Sorting:**  
-   - Filter tasks by **category, priority, or due date**.  
-   - Set **priority levels** (High, Medium, Low).  
-
-✅ **Task Details Page:**  
-   - Displays **full task details** (description, status, deadline, team members).  
-   - **Update task status** (e.g., "Completed", "In Progress").  
-   - Users can **comment on tasks** for collaboration.  
-
-✅ **Task Assignments:**  
-   - Assign tasks to team members.  
-   - Users receive **notifications** when assigned a task.  
-
-✅ **Reminders & Notifications:**  
-   - Users receive **email notifications** for upcoming deadlines and task updates.  
-
-✅ **File Attachments:**  
-   - Users can **upload files** related to tasks.  
-
-✅ **Collaboration Tools:**  
-   - Users can **tag team members** in task discussions.  
+## ✨ Features  
+- **📱 Responsive Design**: Fully optimized for various devices and screen sizes.  
+- **🎨 Modern UI**: Built with a clean and visually appealing design using Bootstrap and Tailwind CSS.  
+- **🔥 Firebase Integration**: Used for authentication and backend services.  
+- **🛒 E-Commerce Functionality**: Includes shopping cart, wishlist, and checkout pages.  
+- **👤 User Profiles**: Personal user dashboards for account management.  
 
 ---
 
-## 📚 Articles & Additional Pages  
-
-✅ **Articles Page:**  
-   - Provides **guides** on task management & time management.  
-
-✅ **About Us Page:**  
-   - Explains the **purpose and vision** of the task management system.  
-
-✅ **Contact Us Page:**  
-   - Includes a form with fields for **Name, Email, and Message**.  
+## 🛠️ Technologies Used  
+- **HTML5** and **CSS3** for the front-end.  
+- **JavaScript** for interactivity and functionality.  
+- **Bootstrap** and **Tailwind CSS** for responsive and modern design.  
+- **Firebase** for authentication and backend services.  
 
 ---
 
-## 🎨 UI & Accessibility  
-
-✅ **Professional UI:**  
-   - Clean and **intuitive layout** designed for productivity.  
-   - Fully **responsive design** for mobile and desktop users.  
-
-✅ **Authentication Handling:**  
-   - Prevents **unauthorized users** from accessing task management pages.  
-   - Blocks **direct URL access** without authentication.  
+## 🎨 Figma Wireframe and Mockup  
+Explore the wireframes and mockups for the project design on Figma:  
+👉 [Access the Figma Wireframe & Mockup](https://www.figma.com/design/your-figma-link)  
 
 ---
 
-## 🌟 Future Enhancements (Ideas 💡)  
-
-🔹 **Dark Mode Support**  
-🔹 **AI-based Task Recommendations**  
-🔹 **Calendar Integration**  
-🔹 **Progress Analytics & Reports**  
+## 📋 Trello Board  
+Track project progress and tasks on Trello:  
+👉 [Trello Board](https://trello.com/b/yRNoKGDm/project-js)
 
 ---
 
-## 🚀 How to Run the Project Locally  
+## 🖼️ Project Preview  
+Below are some screenshots from the portfolio project:
 
-1️⃣ **Clone the repository**  
-```sh
-git clone https://github.com/your-username/your-repo-name.git
+### 📸 Preview 1  
+![Preview 1](https://drive.google.com/uc?export=view&id=1Y9KN98LUH4YPxtr5QLcd2phzBvbP-7yb)
+
+### 📸 Preview 2  
+![Preview 2](https://drive.google.com/uc?export=view&id=1-8u3pStG-W5-bwCU1jvcbF1bACBnbA0F)
+
+### 📸 Preview 3  
+![Preview 3](https://drive.google.com/uc?export=view&id=1o0l09UHPEC1ugInHv9FL2tFUnX881ZrW)
+
+### 📸 Preview 4  
+![Preview 4](https://drive.google.com/uc?export=view&id=1Ha1hddznr7U6ctgaYoxPVLrHHb3fHg_-)
+
+### 📸 Preview 5  
+![Preview 5](https://drive.google.com/uc?export=view&id=1DcCwqMof-NO8KQG2O7rxbPw5xG2E-2W-)
